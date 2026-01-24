@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ECom.API.Helper;
 using ECom.Core.DTO;
 using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
@@ -22,7 +23,7 @@ namespace ECom.API.Controllers
                 var categories = await work.CategoryRepository.GetAllAsync();
                 if (categories is null)
                 {
-                    return BadRequest("No categories found.");
+                    return BadRequest(new ResponseAPI(400));
                 }
                 return Ok(categories);
             }
@@ -40,7 +41,7 @@ namespace ECom.API.Controllers
                 var category = await work.CategoryRepository.GetByIdAsync(id);
                 if (category is null)
                 {
-                    return BadRequest($"Category not found with this Id {id}.");
+                    return BadRequest(new ResponseAPI(400,$"Not Found Category with Id {id}"));
                 }
                 return Ok(category);
             }
@@ -57,7 +58,7 @@ namespace ECom.API.Controllers
                 var category = mapper.Map<Category>(categoryDto); // Using AutoMapper to map DTO to Entity
                 await work.CategoryRepository.AddAsync(category);
 
-                return Ok("Category added successfully.");
+                return Ok(new ResponseAPI(200,"Category has been Created Successfully"));
             }
             catch (Exception ex)
             {
@@ -74,14 +75,14 @@ namespace ECom.API.Controllers
                 //var oldCategory = await work.CategoryRepository.GetByIdAsync(category.Id);
                 if (category is null)
                 {
-                    return BadRequest("There are Error with the Category");
+                    return BadRequest(new ResponseAPI(400,"there are error for update category"));
                 }
                 await work.CategoryRepository.UpdateAsync(category);
-                return Ok("Category updated successfully.");
+                return Ok(new ResponseAPI(200, "Category has been Updated Successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ResponseAPI(400, "there are error for update category"));
             }
         }
 
@@ -96,7 +97,7 @@ namespace ECom.API.Controllers
                     return BadRequest($"Category not found with this Id {id}.");
                 }
                 await work.CategoryRepository.DeleteAsync(id);
-                return Ok("Category deleted successfully.");
+                return Ok(new ResponseAPI(200, "Category Deleted Successfullu"));
             }
             catch (Exception ex)
             {
