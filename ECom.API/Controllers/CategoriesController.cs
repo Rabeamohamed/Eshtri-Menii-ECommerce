@@ -1,4 +1,5 @@
-﻿using ECom.Core.DTO;
+﻿using AutoMapper;
+using ECom.Core.DTO;
 using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,7 @@ namespace ECom.API.Controllers
 
     public class CategoriesController : BaseController
     {
-        public CategoriesController(IUnitOfWork work) : base(work)
+        public CategoriesController(IUnitOfWork work,IMapper mapper) : base(work, mapper)
         {
         }
 
@@ -53,11 +54,7 @@ namespace ECom.API.Controllers
         {
             try
             {
-                var category = new Category()
-                {
-                    Name = categoryDto.Name,
-                    Description = categoryDto.Description
-                };
+                var category = mapper.Map<Category>(categoryDto); // Using AutoMapper to map DTO to Entity
                 await work.CategoryRepository.AddAsync(category);
 
                 return Ok("Category added successfully.");
@@ -72,18 +69,13 @@ namespace ECom.API.Controllers
         {
             try
             {
-                //var oldCategory = await work.CategoryRepository.GetByIdAsync(categoryDto.Id);
-                //if (oldCategory is null)
-                //{
-                //    return BadRequest($"Category not found with this Id {categoryDto.Id}.");
-                //}
-                var category = new Category()
-                {
-                    Id = categoryDto.Id,
-                    Name = categoryDto.Name,
-                    Description = categoryDto.Description
-                };
                
+                var category = mapper.Map<Category>(categoryDto); // Using AutoMapper to map DTO to Entity
+                //var oldCategory = await work.CategoryRepository.GetByIdAsync(category.Id);
+                if (category is null)
+                {
+                    return BadRequest("There are Error with the Category");
+                }
                 await work.CategoryRepository.UpdateAsync(category);
                 return Ok("Category updated successfully.");
             }

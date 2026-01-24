@@ -19,8 +19,4 @@
     <ProjectReference Include="..\ECom.Infrastructure\ECom.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Mapping\" />
-  </ItemGroup>
-
 </Project>
