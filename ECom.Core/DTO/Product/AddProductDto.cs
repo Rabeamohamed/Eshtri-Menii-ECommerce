@@ -13,7 +13,6 @@ namespace ECom.Core.DTO.Product
         public string Description { get; init; }
         public decimal OldPrice { get; init; }
         public decimal NewPrice { get; init; }
-
         public int CategoryId { get; set; }
         public IFormFileCollection Photo { get; init; }
     }

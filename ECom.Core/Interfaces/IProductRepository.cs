@@ -14,6 +14,7 @@ namespace ECom.Core.Interfaces
         // Add Product-specific methods here
 
         Task<bool> AddAsync(AddProductDto  productDto);
-        
+        Task<bool> UpdateAsync(UpdateProductDto productDto);
+
     }
 }

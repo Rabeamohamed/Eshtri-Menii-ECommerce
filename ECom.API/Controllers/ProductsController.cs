@@ -69,5 +69,24 @@ namespace ECom.API.Controllers
             }
         }
 
-    }
+        [HttpPut("update-product/{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto productDto)
+        {
+            try
+            {
+                var product = await work.ProductRepository.GetByIdAsync(id);
+                if (product is null)
+                {
+                    return BadRequest(new ResponseAPI(404, $"Product Not found with Id {id}"));
+                }
+                mapper.Map(productDto, product);
+                work.ProductRepository.Update(product);
+                await work.SaveChangesAsync();
+                return Ok(new ResponseAPI(200, "Product Updated Successfuly"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(400, ex.Message));
+            }
+        }
 }

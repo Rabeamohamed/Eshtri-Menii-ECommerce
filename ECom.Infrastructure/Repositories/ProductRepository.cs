@@ -4,6 +4,7 @@ using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,39 @@ namespace ECom.Infrastructure.Repositories
             }).ToList();
 
             await context.Photos.AddRangeAsync(photo);
+            await context.SaveChangesAsync();
+            return true;
+
+        }
+
+        public async Task<bool> UpdateAsync(UpdateProductDto productDto)
+        {
+            if (productDto is null) return false;
+
+            var product = await context.Products.Include(c=>c.Category)
+                .Include(p=>p.Photos).FirstOrDefaultAsync(x => x.Id == productDto.Id);
+
+            if (product is null) return false;
+
+            mapper.Map(productDto, product);
+
+            var oldPhotos = await context.Photos.Where(p => p.ProductId == product.Id).ToListAsync(); // Get existing photos before updating
+
+            foreach (var item in oldPhotos)
+            {
+                imageManagementService.DeleteImageAsync(item.ImageName);
+            }
+            context.Photos.RemoveRange(oldPhotos);
+
+            var ImagePaths = await imageManagementService.AddImageAsync(productDto.Photo, productDto.Name);
+            var photos = ImagePaths.Select(path => new Photo
+            {
+                ImageName = path,
+                ProductId = product.Id
+            }).ToList();
+
+            await context.Photos.AddRangeAsync(photos);
+            //context.Products.Update(product);
             await context.SaveChangesAsync();
             return true;
 
