@@ -56,32 +56,25 @@ namespace ECom.API.Controllers
             }
         }
         [HttpPost("create-product")]
-        public async Task<IActionResult> CreateProduct( AddProductDto productDto)
+        public async Task<IActionResult> CreateProduct(AddProductDto productDto)
         {
             try
             {
                 await work.ProductRepository.AddAsync(productDto);
-                return Ok(new ResponseAPI(200,"Product Created Successfuly"));
+                return Ok(new ResponseAPI(200, "Product Created Successfuly"));
             }
             catch (Exception ex)
             {
-                return BadRequest(new ResponseAPI(400,ex.Message));
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
 
-        [HttpPut("update-product/{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto productDto)
+        [HttpPut("update-product")]
+        public async Task<IActionResult> UpdateProduct(UpdateProductDto updateProductDto)
         {
             try
             {
-                var product = await work.ProductRepository.GetByIdAsync(id);
-                if (product is null)
-                {
-                    return BadRequest(new ResponseAPI(404, $"Product Not found with Id {id}"));
-                }
-                mapper.Map(productDto, product);
-                work.ProductRepository.Update(product);
-                await work.SaveChangesAsync();
+                await work.ProductRepository.UpdateAsync(updateProductDto);
                 return Ok(new ResponseAPI(200, "Product Updated Successfuly"));
             }
             catch (Exception ex)
@@ -89,4 +82,5 @@ namespace ECom.API.Controllers
                 return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
+    }
 }
