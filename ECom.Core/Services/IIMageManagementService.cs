@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ECom.Core.Services
 {
-    public interface IIMageManagementService
+    public interface IImageManagementService
     {
         Task<List<string>> AddImageAsync(IFormFileCollection files, string src);
         void DeleteImageAsync(string src);

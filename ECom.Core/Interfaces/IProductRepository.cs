@@ -1,4 +1,5 @@
-﻿using ECom.Core.Entities.Product;
+﻿using ECom.Core.DTO.Product;
+using ECom.Core.Entities.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,9 @@ namespace ECom.Core.Interfaces
     public interface IProductRepository : IGenericRepository<Product>
     {
         // Additional Method that specialized for Product only
+        // Add Product-specific methods here
+
+        Task<bool> AddAsync(AddProductDto  productDto);
+        
     }
 }

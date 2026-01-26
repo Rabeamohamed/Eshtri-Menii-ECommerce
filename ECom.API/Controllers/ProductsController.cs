@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using ECom.API.Helper;
-using ECom.Core.DTO;
+using ECom.Core.DTO.Product;
 using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -55,19 +55,19 @@ namespace ECom.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        //[HttpPost("create-product")]
-        //public async Task<IActionResult> CreateProduct([FromBody] ProductDto productDto)
-        //{
-        //    try
-        //    {
-        //        var product = mapper.Map<Product>(productDto);
-        //        await work.ProductRepository.AddAsync(product);
-        //        await work.CommitAsync();
-        //        return Ok(new ResponseAPI(200, "Product Created Successfully"));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
+        [HttpPost("create-product")]
+        public async Task<IActionResult> CreateProduct( AddProductDto productDto)
+        {
+            try
+            {
+                await work.ProductRepository.AddAsync(productDto);
+                return Ok(new ResponseAPI(200,"Product Created Successfuly"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(400,ex.Message));
+            }
+        }
+
+    }
 }

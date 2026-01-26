@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Repositories.Service
 {
-    public class IMageManagementService : IIMageManagementService
+    public class ImgeManagementService : IImageManagementService
     {
         private readonly IFileProvider fileProvider;
-        public IMageManagementService(IFileProvider fileProvider)
+        public ImgeManagementService(IFileProvider fileProvider)
         {
             this.fileProvider = fileProvider;
         }
@@ -28,7 +28,7 @@ namespace ECom.Infrastructure.Repositories.Service
 
             foreach (var file in files)
             {
-                if (file.Length <= 0)
+                if (file.Length > 0)
                 {
                     // Get Image Name
                     var ImageName = file.FileName;

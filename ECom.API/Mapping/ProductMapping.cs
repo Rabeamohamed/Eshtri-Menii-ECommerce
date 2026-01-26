@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ECom.Core.DTO;
+using ECom.Core.DTO.Product;
 using ECom.Core.Entities.Product;
 
 namespace ECom.API.Mapping
@@ -13,7 +14,10 @@ namespace ECom.API.Mapping
                 .ForMember(x=>x.CategoryName  // Map Category.Name to CategoryName in ProductDto
                 , op => op.MapFrom(x => x.Category.Name)).ReverseMap();
 
-            CreateMap<Photo, PhotoDto>().ReverseMap();
+            CreateMap<AddProductDto , Product>()
+                .ForMember(p => p.Photos, op =>op.Ignore())
+                .ReverseMap();
+
         }
 
     }

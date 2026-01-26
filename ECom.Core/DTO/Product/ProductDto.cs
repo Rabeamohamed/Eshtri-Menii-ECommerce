@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECom.Core.DTO
+namespace ECom.Core.DTO.Product
 {
     public record ProductDto
     {
@@ -16,9 +16,5 @@ namespace ECom.Core.DTO
         public string CategoryName { get; init; }
     }
 
-    public record PhotoDto
-    {
-        public string ImageName { get; init; }
-        public int ProductId { get; set; }
-    }
+
 }

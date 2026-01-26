@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ECom.Core.DTO
 {
-    public record CategoryDto(string Name,string Description);
-    public record UpdateCategoryDto(int Id,string Name,string Description);
+    public record PhotoDto
+    {
+        public string ImageName { get; init; }
+        public int ProductId { get; set; }
+    }
 }
