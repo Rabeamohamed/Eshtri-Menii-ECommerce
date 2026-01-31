@@ -2,6 +2,9 @@ using ECom.API.Middleware;
 using ECom.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
+// In-Memory Caching Service Registration for Rate Limiting in Exception Middleware
+builder.Services.AddMemoryCache();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
