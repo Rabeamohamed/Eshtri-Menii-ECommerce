@@ -24,6 +24,9 @@ namespace ECom.API.Middleware
         {
             try
             {
+
+                ApplySecurity(context);
+
                 if (IsRequestAllowed(context) == false)
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;  
@@ -86,5 +89,15 @@ namespace ECom.API.Middleware
             return true; // Request allowed
 
         }
+
+        public void ApplySecurity(HttpContext context)
+        {
+            context.Response.Headers.Add("X-Content-Type-Options", "nosniff"); // Prevent MIME type sniffing apply content type options 
+            context.Response.Headers.Add("X-Frame-Options", "DENY"); // Prevent Clickjacking attacks apply frame options
+            context.Response.Headers.Add("X-XSS-Protection", "1; mode=block"); // Enable XSS protection in browsers apply XSS filtering protections
+            //context.Response.Headers.Add("Referrer-Policy", "no-referrer");
+            //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'");
+        }
+
     }
 }
