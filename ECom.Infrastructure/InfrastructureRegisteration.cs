@@ -2,7 +2,7 @@
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
-using ECom.Infrastructure.Repositories.Service;
+using ECom.Infrastructure.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

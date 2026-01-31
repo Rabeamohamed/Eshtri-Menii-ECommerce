@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECom.Infrastructure.Repositories.Service
+namespace ECom.Infrastructure.Service
 {
     public class ImgeManagementService : IImageManagementService
     {
