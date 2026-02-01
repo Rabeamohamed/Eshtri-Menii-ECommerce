@@ -35,17 +35,19 @@ namespace ECom.Infrastructure.Repositories
                 .Include(P => P.Photos)
                 .AsNoTracking();  // AsNoTracking improves performance for read-only scenarios not see any changes of updates give better performance
 
+            // Apply search filter by word on Name and Description if search parameter is provided
+            if(!string.IsNullOrEmpty(productParams.Search))
+            {
+                var searchLower = productParams.Search.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(searchLower) 
+                || p.Description.ToLower().Contains(searchLower));
+            }
 
             // Apply category filter if categoryId is provided
             if (productParams.CategoryId.HasValue)
             {
                 query = query.Where(p => p.CategoryId == productParams.CategoryId.Value);
             }
-
-
-
-            //if (!string.IsNullOrEmpty(productParams.Sort))  // delete if to make the user can sort without passing sort parameter
-            //{
 
             // Apply sorting based on the sort parameter
 
@@ -56,8 +58,7 @@ namespace ECom.Infrastructure.Repositories
                 "NameDce" => query.OrderByDescending(p => p.Name),
                 _ => query.OrderBy(p => p.Name),
             };
-            //}
-
+           
 
             // Apply pagination , Pagination is the last step after filtering and sorting or any other operation it is the final operation
 
