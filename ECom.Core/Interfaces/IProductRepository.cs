@@ -12,7 +12,7 @@ namespace ECom.Core.Interfaces
     {
         // Additional Method that specialized for Product only
         // Add Product-specific methods here
-        Task<IEnumerable<ProductDto>> GetAllAsync(string? sort);
+        Task<IEnumerable<ProductDto>> GetAllAsync(int? categoryId, string? sort);
         Task<bool> AddAsync(AddProductDto  productDto);
         Task<bool> UpdateAsync(UpdateProductDto productDto);
         Task DeleteAsync(Product product);

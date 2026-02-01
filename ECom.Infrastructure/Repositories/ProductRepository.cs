@@ -27,16 +27,27 @@ namespace ECom.Infrastructure.Repositories
             this.imageManagementService = imageManagementService;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllAsync(string? sort)
+        public async Task<IEnumerable<ProductDto>> GetAllAsync(int? categoryId,string? sort)
         {
             var query = context.Products   // Use IQueryable for deferred execution because IQueryable is faster than IEnumerable 
                 .Include(C => C.Category)           // because it translates queries to SQL and executes them on the database server not in your machine
                 .Include(P => P.Photos)
                 .AsNoTracking();  // AsNoTracking improves performance for read-only scenarios not see any changes of updates give better performance
 
+
+            // Apply category filter if categoryId is provided
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+
+
             //if (!string.IsNullOrEmpty(sort))
             //{
-                switch(sort)
+
+            // Apply sorting based on the sort parameter
+            switch (sort)
                 {
                     case "PriceAsn":
                         query = query.OrderBy(p => p.NewPrice);
