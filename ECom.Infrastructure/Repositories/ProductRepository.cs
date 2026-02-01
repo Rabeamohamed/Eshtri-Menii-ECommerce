@@ -27,7 +27,7 @@ namespace ECom.Infrastructure.Repositories
             this.imageManagementService = imageManagementService;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllAsync(int? categoryId,string? sort)
+        public async Task<IEnumerable<ProductDto>> GetAllAsync(int? categoryId, int pageNumber, int pageSize, string? sort)
         {
             var query = context.Products   // Use IQueryable for deferred execution because IQueryable is faster than IEnumerable 
                 .Include(C => C.Category)           // because it translates queries to SQL and executes them on the database server not in your machine
@@ -43,26 +43,26 @@ namespace ECom.Infrastructure.Repositories
 
 
 
-            //if (!string.IsNullOrEmpty(sort))
+            //if (!string.IsNullOrEmpty(sort))  // delete if to make the user can sort without passing sort parameter
             //{
 
             // Apply sorting based on the sort parameter
-            switch (sort)
-                {
-                    case "PriceAsn":
-                        query = query.OrderBy(p => p.NewPrice);
-                        break;
-                    case "PriceDes":
-                        query = query.OrderByDescending(p => p.NewPrice);
-                        break;
-                    case "NameDes":
-                        query = query.OrderByDescending(p => p.Name);
-                        break;
-                    default:
-                        query = query.OrderBy(p => p.Name);
-                        break;
-                }
+            query = sort switch
+            {
+                "PriceAce" => query.OrderBy(p => p.NewPrice),
+                "PriceDce" => query.OrderByDescending(p => p.NewPrice),
+                "NameDes" => query.OrderByDescending(p => p.Name),
+                _ => query.OrderBy(p => p.Name),
+            };
             //}
+
+
+            // Apply pagination , Pagination is the last step after filtering and sorting or any other operation it is the final operation
+
+            pageNumber = pageNumber > 0 ? pageNumber : 1; // Ensure pageNumber is at least 1
+            pageSize = pageSize > 0 ? pageSize : 3; // Ensure pageSize is greater than 0
+
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize); // Skip the records of previous pages and take only the records of the current page
 
             //var products = await query.ToListAsync();
 

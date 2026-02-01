@@ -15,12 +15,12 @@ namespace ECom.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllProducts(int? categoryId, string? sort = null)
+        public async Task<IActionResult> GetAllProducts(int? categoryId, int pageNumber, int pageSize, string? sort=null)
         {
             try
             {
                 var products = await work.ProductRepository
-                    .GetAllAsync(categoryId, sort);
+                    .GetAllAsync(categoryId, pageNumber, pageSize, sort);
 
                 return Ok(products);
             }
