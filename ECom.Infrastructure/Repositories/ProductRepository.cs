@@ -38,9 +38,14 @@ namespace ECom.Infrastructure.Repositories
             // Apply search filter by word on Name and Description if search parameter is provided
             if(!string.IsNullOrEmpty(productParams.Search))
             {
-                var searchLower = productParams.Search.ToLower();
-                query = query.Where(p => p.Name.ToLower().Contains(searchLower) 
-                || p.Description.ToLower().Contains(searchLower));
+                var searchWords = productParams.Search.Split(" ");
+
+                query = query.Where(p => searchWords.All(word =>
+
+                p.Name.ToLower().Contains(word.ToLower()) ||
+                p.Description.ToLower().Contains(word.ToLower())
+                
+                ));
             }
 
             // Apply category filter if categoryId is provided
