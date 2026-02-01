@@ -15,20 +15,14 @@ namespace ECom.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts(string? sort = null)
         {
             try
             {
-                var products = await work.ProductRepository.
-                    GetAllAsync(C => C.Category, P => P.Photos);
+                var products = await work.ProductRepository
+                    .GetAllAsync(sort);
 
-                var result = mapper.Map<List<ProductDto>>(products);
-
-                if (products is null)
-                {
-                    return BadRequest(new ResponseAPI(400));
-                }
-                return Ok(result);
+                return Ok(products);
             }
             catch (Exception ex)
             {
@@ -36,6 +30,7 @@ namespace ECom.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {

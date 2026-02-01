@@ -27,6 +27,39 @@ namespace ECom.Infrastructure.Repositories
             this.imageManagementService = imageManagementService;
         }
 
+        public async Task<IEnumerable<ProductDto>> GetAllAsync(string? sort)
+        {
+            var query = context.Products   // Use IQueryable for deferred execution because IQueryable is faster than IEnumerable 
+                .Include(C => C.Category)           // because it translates queries to SQL and executes them on the database server not in your machine
+                .Include(P => P.Photos)
+                .AsNoTracking();  // AsNoTracking improves performance for read-only scenarios not see any changes of updates give better performance
+
+            //if (!string.IsNullOrEmpty(sort))
+            //{
+                switch(sort)
+                {
+                    case "PriceAsn":
+                        query = query.OrderBy(p => p.NewPrice);
+                        break;
+                    case "PriceDes":
+                        query = query.OrderByDescending(p => p.NewPrice);
+                        break;
+                    case "NameDes":
+                        query = query.OrderByDescending(p => p.Name);
+                        break;
+                    default:
+                        query = query.OrderBy(p => p.Name);
+                        break;
+                }
+            //}
+
+            //var products = await query.ToListAsync();
+
+            var result = mapper.Map<List<ProductDto>>(query);
+            return result;
+
+        }
+
         public async Task<bool> AddAsync(AddProductDto productDto)
         {
             if (productDto is null)return false;

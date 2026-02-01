@@ -11,7 +11,8 @@ namespace ECom.Core.DTO.Product
         
         public string Name { get; init; }
         public string Description { get; init; }
-        public decimal Price { get; init; }
+        public decimal OldPrice { get; init; }
+        public decimal NewPrice { get; init; }
         public List<PhotoDto> Photos { get; init; }
         public string CategoryName { get; init; }
     }
