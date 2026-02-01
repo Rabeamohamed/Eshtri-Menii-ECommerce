@@ -23,7 +23,10 @@ namespace ECom.API.Controllers
                 var products = await work.ProductRepository
                     .GetAllAsync( productParams);
 
-                return Ok(products);
+                var totalCount = await work.ProductRepository
+                    .CountAsync(); // Get total count of prodcuts for pagination 
+
+                return Ok(new Pagination<ProductDto>(productParams.PageNumber,productParams.PageSize, totalCount,products));
             }
             catch (Exception ex)
             {
