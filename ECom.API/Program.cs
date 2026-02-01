@@ -2,7 +2,20 @@ using ECom.API.Middleware;
 using ECom.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
-// In-Memory Caching Service Registration for Rate Limiting in Exception Middleware
+
+
+// CORS Policy Configuration 
+builder.Services.AddCors(op =>
+{
+    op.AddPolicy("CROSPolicy", builder =>
+    {
+        builder.AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .WithOrigins("https://localhost:4200"); // Adjust the origin as needed
+    });
+}); 
+// In-Memory Caching Service Registration for Rate Limiting in Exception Middlewaret
 builder.Services.AddMemoryCache();
 
 // Add services to the container.
@@ -23,6 +36,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("CROSPolicy"); // CORS Middleware Registration
 
 app.UseMiddleware<ExceptionMiddleware>(); // Custom Exception Middleware Registration
 
