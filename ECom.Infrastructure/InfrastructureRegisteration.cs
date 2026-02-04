@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +25,14 @@ namespace ECom.Infrastructure
 
             // Applying Unit of Work Pattern
             service.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Apply Redis Connection for Caching
+            service.AddSingleton<IConnectionMultiplexer>(i =>
+            {
+                var config = ConfigurationOptions.Parse(configuration.GetConnectionString("Redis"), true);
+                return ConnectionMultiplexer.Connect(config);
+            });
+
 
             // Register IFileProvider for ImageManagementService
             service.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine( Directory.GetCurrentDirectory(),"wwwroot")));
