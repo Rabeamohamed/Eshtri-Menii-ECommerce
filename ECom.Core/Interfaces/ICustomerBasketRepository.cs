@@ -9,8 +9,8 @@ namespace ECom.Core.Interfaces
 {
     public interface ICustomerBasketRepository
     {
-        Task<CustomerBasket> GetBasketAsync(int id); // basketId
+        Task<CustomerBasket> GetBasketAsync(string id); // basketId
         Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket);
-        Task<bool> DeleteBasketAsync(int id); // basketId
+        Task<bool> DeleteBasketAsync(string id); // basketId
     }
 }
