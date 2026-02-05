@@ -18,7 +18,10 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> GetBasketItem(string id)
         {
             var basket = await work.CustomerBasketRepository.GetBasketAsync(id);
-            if (basket == null) return NotFound();
+            if (basket == null)
+            {
+                return Ok(new CustomerBasket());
+            }
             return Ok(basket);
         }
         [HttpPost("update-basket")]
@@ -36,3 +39,4 @@ namespace ECom.API.Controllers
         }
     }
 }
+ 
