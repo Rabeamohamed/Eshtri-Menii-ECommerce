@@ -12,7 +12,7 @@ builder.Services.AddCors(op =>
         builder.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("https://localhost:4200"); // Adjust the origin as needed
+              .WithOrigins("http://localhost:4200"); // Adjust the origin as needed
     });
 }); 
 // In-Memory Caching Service Registration for Rate Limiting in Exception Middlewaret
