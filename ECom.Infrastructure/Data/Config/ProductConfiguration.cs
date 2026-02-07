@@ -16,6 +16,7 @@ namespace ECom.Infrastructure.Data.Config
             builder.Property(n => n.Name).IsRequired();
             builder.Property(d => d.Description).IsRequired();
             builder.Property(p => p.NewPrice).HasColumnType("decimal(18,2)");
+            builder.Property(p => p.OldPrice).HasColumnType("decimal(18,2)");
             builder.HasData(new Product { Id = 1, Name = "Test Product", Description = "Description Test of Product 1",CategoryId=1, NewPrice = 12 });
 
         }
