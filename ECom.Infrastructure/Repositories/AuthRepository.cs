@@ -47,6 +47,9 @@ namespace ECom.Infrastructure.Repositories
             }
 
             // Send Actice or Confirmation Email
+            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await SendEmail(user.Email, code, "Active","Active Email","Please Active your Email, Click on button to Active");
+
             return "User Registered Successfully";
             
         }
