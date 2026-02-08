@@ -20,6 +20,11 @@ namespace ECom.Infrastructure.Repositories
         private readonly IImageManagementService _imageManagementService; // Inject Image Management Service to send to ProductRepository
         private readonly IConnectionMultiplexer _redis; // Inject IConnectionMultiplexer for Redis
         private readonly UserManager<AppUser> _userManager; // Inject UserManager for Identity
+        private readonly IEmailService _emailService;
+        private readonly SignInManager<AppUser> _signInManager; // Inject SignInManager for Identity
+                                                                
+
+
 
         public ICategoryRepository CategoryRepository { get; }
 
@@ -29,21 +34,23 @@ namespace ECom.Infrastructure.Repositories
 
         public ICustomerBasketRepository CustomerBasketRepository { get; }
 
-        public IAuth Auth { get; }
+        public IAuth AuthRepository { get; }
 
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService
-            , IConnectionMultiplexer redis, UserManager<AppUser> userManager)
+            , IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager)
         {
             _context = context;
             _mapper = mapper;
             _redis = redis;
             _userManager = userManager;
             _imageManagementService = imageManagementService;
+            _emailService = emailService;
+            _signInManager = signInManager;
             CategoryRepository = new CategoryRepository(context);
             ProductRepository = new ProductRepository(context, _mapper, _imageManagementService);
             PhotoRepository = new PhotoRepository(context); // Initialize PhotoRepository
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
-            Auth = new AuthRepository(userManager); // Initialize AuthRepository in UnitOfWork constructor
+            AuthRepository = new AuthRepository(userManager,_emailService,_signInManager); // Initialize AuthRepository in UnitOfWork constructor
         }
 
     }

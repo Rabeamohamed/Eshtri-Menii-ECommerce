@@ -26,6 +26,9 @@ namespace ECom.Infrastructure
             // Applying Unit of Work Pattern
             service.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Registering Email Service
+            service.AddScoped<IEmailService, EmailService>();
+
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>
             {
