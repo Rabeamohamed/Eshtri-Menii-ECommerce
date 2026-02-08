@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using ECom.Core.DTO;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace ECom.Infrastructure.Repositories
         private readonly IMapper _mapper; // Inject IMapper to send to ProductRepository
         private readonly IImageManagementService _imageManagementService; // Inject Image Management Service to send to ProductRepository
         private readonly IConnectionMultiplexer _redis; // Inject IConnectionMultiplexer for Redis
+        private readonly UserManager<AppUser> _userManager; // Inject UserManager for Identity
 
         public ICategoryRepository CategoryRepository { get; }
 
@@ -24,20 +27,23 @@ namespace ECom.Infrastructure.Repositories
 
         public IPhotoRepository PhotoRepository { get; }
 
-        public ICustomerBasketRepository CustomerBasketRepository { get; } 
+        public ICustomerBasketRepository CustomerBasketRepository { get; }
+
+        public IAuth Auth { get; }
 
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService
-            ,IConnectionMultiplexer redis)
+            , IConnectionMultiplexer redis, UserManager<AppUser> userManager)
         {
             _context = context;
             _mapper = mapper;
             _redis = redis;
+            _userManager = userManager;
             _imageManagementService = imageManagementService;
             CategoryRepository = new CategoryRepository(context);
-            ProductRepository = new ProductRepository(context,_mapper,_imageManagementService);
+            ProductRepository = new ProductRepository(context, _mapper, _imageManagementService);
             PhotoRepository = new PhotoRepository(context); // Initialize PhotoRepository
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
-
+            Auth = new AuthRepository(userManager); // Initialize AuthRepository in UnitOfWork constructor
         }
 
     }
