@@ -46,6 +46,7 @@ namespace ECom.Infrastructure.Repositories
                 return result.Errors.ToList()[0].Description;
             }
 
+            // Send Actice or Confirmation Email
             return "User Registered Successfully";
             
         }
