@@ -41,6 +41,7 @@ namespace ECom.Infrastructure.Repositories
             {
                 Email = registerDto.Email,
                 UserName = registerDto.UserName,
+                DisplayName = registerDto.DisplayName
             };
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (result.Succeeded is not true)

@@ -41,11 +41,12 @@ app.UseCors("CROSPolicy"); // CORS Middleware Registration
 
 app.UseMiddleware<ExceptionMiddleware>(); // Custom Exception Middleware Registration
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseStatusCodePagesWithReExecute("/errors/{0}"); // Global Error Handling Middleware Registration to Redirect to Error Controller
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

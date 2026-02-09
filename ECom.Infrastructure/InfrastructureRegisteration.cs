@@ -1,4 +1,5 @@
-﻿using ECom.Core.Interfaces;
+﻿using ECom.Core.DTO;
+using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
@@ -6,6 +7,7 @@ using ECom.Infrastructure.Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +49,9 @@ namespace ECom.Infrastructure
             service.AddDbContext<AppDbContext>(options => {
                 options.UseSqlServer(configuration.GetConnectionString("EComConnection"));
             });
+
+            // Apply Identity Configuration
+            service.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
             // Apply Authentication Configuration for JWT and Cookies Authentication 
 
