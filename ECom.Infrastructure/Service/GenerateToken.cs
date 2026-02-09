@@ -21,8 +21,7 @@ namespace ECom.Infrastructure.Service
             _configuration = configuration;
         }
 
-        public async
-            Task<string> GetAndGenerateToken(AppUser user)
+        public string GetAndGenerateToken(AppUser user)
         {
             List<Claim> claims = new List<Claim>()
             {

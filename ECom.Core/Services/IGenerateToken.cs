@@ -9,6 +9,6 @@ namespace ECom.Core.Services
 {
     public interface IGenerateToken
     {
-        Task<string> GetAndGenerateToken(AppUser user);
+        string GetAndGenerateToken(AppUser user);
     }
 }

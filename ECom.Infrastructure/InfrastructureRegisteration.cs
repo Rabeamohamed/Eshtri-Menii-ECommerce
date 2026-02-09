@@ -8,12 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure
 {
@@ -28,6 +22,9 @@ namespace ECom.Infrastructure
 
             // Registering Email Service
             service.AddScoped<IEmailService, EmailService>();
+
+            // Registering Token
+            service.AddScoped<IGenerateToken, GenerateToken>();
 
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>

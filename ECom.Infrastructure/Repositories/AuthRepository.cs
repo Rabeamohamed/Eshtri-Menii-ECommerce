@@ -11,11 +11,13 @@ namespace ECom.Infrastructure.Repositories
         private readonly UserManager<AppUser> _userManager;
         private readonly IEmailService _emailService;
         private readonly SignInManager<AppUser> _signInManager;
-        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager)
+        private readonly IGenerateToken _generateToken;
+        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken)
         {
             _userManager = userManager;
             _emailService = emailService;
             _signInManager = signInManager;
+            _generateToken = generateToken;
         }
 
         public async Task<string> RegisterAsync(RegisterDto registerDto)
@@ -81,7 +83,7 @@ namespace ECom.Infrastructure.Repositories
             
             if (result.Succeeded)
             {
-                return "Login done Successfully";
+                return _generateToken.GetAndGenerateToken(user);
             }
           
             return "UPlease Check your E-mail or Password , Something went wrong";

@@ -22,7 +22,7 @@ namespace ECom.Infrastructure.Repositories
         private readonly UserManager<AppUser> _userManager; // Inject UserManager for Identity
         private readonly IEmailService _emailService;
         private readonly SignInManager<AppUser> _signInManager; // Inject SignInManager for Identity
-                                                                
+        private readonly IGenerateToken _generateToken; // Inject IGenerateToken for token generation    
 
 
 
@@ -37,7 +37,7 @@ namespace ECom.Infrastructure.Repositories
         public IAuth AuthRepository { get; }
 
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService
-            , IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager)
+            , IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken)
         {
             _context = context;
             _mapper = mapper;
@@ -46,11 +46,12 @@ namespace ECom.Infrastructure.Repositories
             _imageManagementService = imageManagementService;
             _emailService = emailService;
             _signInManager = signInManager;
+            _generateToken = generateToken;
             CategoryRepository = new CategoryRepository(context);
             ProductRepository = new ProductRepository(context, _mapper, _imageManagementService);
             PhotoRepository = new PhotoRepository(context); // Initialize PhotoRepository
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
-            AuthRepository = new AuthRepository(userManager,_emailService,_signInManager); // Initialize AuthRepository in UnitOfWork constructor
+            AuthRepository = new AuthRepository(userManager, _emailService, _signInManager,_generateToken); // Initialize AuthRepository in UnitOfWork constructor
         }
 
     }
