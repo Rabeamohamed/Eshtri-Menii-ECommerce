@@ -87,7 +87,7 @@ namespace ECom.Infrastructure.Repositories
                 return _generateToken.GetAndGenerateToken(user);
             }
 
-            return "UPlease Check your E-mail or Password , Something went wrong";
+            return "Please Check your E-mail or Password , Something went wrong";
         }
 
         public async Task<bool> SendEmailForForgetPassword(string email)
