@@ -29,7 +29,7 @@ namespace ECom.Infrastructure.Service
                 new Claim(ClaimTypes.Email,user.Email)
             };
 
-            var Security = _configuration["Token:KeyIssuer"];
+            var Security = _configuration["Token:Issuer"];
             var key = Encoding.ASCII.GetBytes(Security);
 
             SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);

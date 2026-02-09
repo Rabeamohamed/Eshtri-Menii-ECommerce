@@ -3,11 +3,15 @@ using ECom.Core.Services;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using StackExchange.Redis;
+using System.Text;
 
 namespace ECom.Infrastructure
 {
@@ -35,14 +39,63 @@ namespace ECom.Infrastructure
 
 
             // Register IFileProvider for ImageManagementService
-            service.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine( Directory.GetCurrentDirectory(),"wwwroot")));
+            service.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
 
             service.AddSingleton<IImageManagementService, ImgeManagementService>();
 
             // Apply DbContext Registration
-            service.AddDbContext<AppDbContext>(options =>{
+            service.AddDbContext<AppDbContext>(options => {
                 options.UseSqlServer(configuration.GetConnectionString("EComConnection"));
-                });
+            });
+
+            // Apply Authentication Configuration for JWT and Cookies Authentication 
+
+            service.AddAuthentication(options =>
+             {
+                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+             })
+                
+                .AddCookie(o =>
+             {
+                 o.Cookie.Name = "token";
+                 o.Events.OnRedirectToLogin = context =>
+                 {
+                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                     return Task.CompletedTask;
+                 };
+             })
+             
+             .AddJwtBearer(op=>
+             {
+                 op.RequireHttpsMetadata = false;
+                 op.SaveToken = true;
+                 op.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                 {
+                     ValidateIssuerSigningKey = true,
+                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Token:Secret"])),
+                     ValidateIssuer = true,
+                     ValidIssuer = configuration["Token:Issuer"],
+                     ValidateAudience = false,
+                     ClockSkew = TimeSpan.Zero
+                 };
+                 op.Events = new JwtBearerEvents()
+                 {
+                     OnMessageReceived = context =>
+                     {
+                         var token = context.Request.Cookies["token"];
+                         //if (!string.IsNullOrEmpty(token))
+                         //{
+                         //    context.Token = token;
+                         //}
+                         return Task.CompletedTask;
+                     }
+                 };
+             });
+
+
+
 
             return service;
         }
