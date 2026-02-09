@@ -88,5 +88,17 @@ namespace ECom.Infrastructure.Repositories
           
             return "UPlease Check your E-mail or Password , Something went wrong";
         }
+
+        public async Task<bool> SendEmailForForgetPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                return false;
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await SendEmail(user.Email, token, "Reset-Password", "Reset Password", "Please Click on button to Reset your Password");
+            return true;
+        }
     }
 }
