@@ -80,12 +80,12 @@ namespace ECom.Infrastructure.Repositories
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
-            
+
             if (result.Succeeded)
             {
                 return _generateToken.GetAndGenerateToken(user);
             }
-          
+
             return "UPlease Check your E-mail or Password , Something went wrong";
         }
 
@@ -100,5 +100,20 @@ namespace ECom.Infrastructure.Repositories
             await SendEmail(user.Email, token, "Reset-Password", "Reset Password", "Please Click on button to Reset your Password");
             return true;
         }
+
+        public async Task<string> ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+            if (user is null)
+            {
+                return "Invalid Email";
+            }
+            var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
+            if (result.Succeeded)
+            {
+                return "Password Reset and changed Successfully";
+            }
+            return result.Errors.ToList()[0].Description;
+        }
     }
-}
+} 
