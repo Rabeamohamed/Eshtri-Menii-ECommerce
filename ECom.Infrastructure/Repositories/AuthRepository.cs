@@ -115,5 +115,22 @@ namespace ECom.Infrastructure.Repositories
             }
             return result.Errors.ToList()[0].Description;
         }
+
+        public async Task<bool> ActiveEmail(ActiveEmailDto activeEmailDto)
+        {
+            var user = await _userManager.FindByEmailAsync(activeEmailDto.Email);
+            if (user is null)
+            {
+                return false;
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, activeEmailDto.Token);
+            if (result.Succeeded)
+            {
+                return result.Succeeded;
+            }
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await SendEmail(user.Email, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
+            return false;
+        }
     }
 } 
