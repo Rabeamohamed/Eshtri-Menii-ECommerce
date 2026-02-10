@@ -4,6 +4,6 @@
     {
         Pending,
         PaymentReceived,
-        PaymentFaild
+        PaymentFailed
     }
 }

@@ -9,7 +9,7 @@ namespace ECom.Core.Entities.Order
         public ShippingAddress ShippingAddress { get; set; }
         public DeliveryMethod DeliveryMethod { get; set; }
         public IReadOnlyList<OrderItems> OrderItems { get; set; }
-        public PaymentStatus Status { get; set; }
+        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
     }
 
 }
