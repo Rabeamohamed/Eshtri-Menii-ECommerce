@@ -1,7 +1,9 @@
 ﻿using ECom.Core.DTO;
+using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +23,11 @@ namespace ECom.Infrastructure.Data
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Photo> Photos { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<Orders> Orders { get; set; }
+        public virtual DbSet<OrderItems> OrderItems { get; set; }
+
+        public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
