@@ -10,7 +10,7 @@ namespace ECom.Core.Services
 {
     public interface IOrderService
     {
-        Task<Orders> CreateOrder(OrderDto orderDto,string BuyerEmail);
+        Task<Orders> CreateOrderAsync(OrderDto orderDto,string BuyerEmail);
         Task<IReadOnlyList<Orders>> GetAllOrdersForUserAsync(string BuyerEmail); 
         Task<Orders> GetOrderByIdAsync(int  id,string BuyerEmail);
         Task<IReadOnlyList<DeliveryMethod>> GetDealMethodAsync();
