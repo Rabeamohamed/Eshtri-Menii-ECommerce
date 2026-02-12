@@ -23,6 +23,8 @@ namespace ECom.Infrastructure.Data.Config
             // Convert the Enum to String
             builder.Property(s => s.Status).HasConversion(x => x.ToString(),
                 x => (PaymentStatus)Enum.Parse(typeof(PaymentStatus), x));
+
+            builder.Property(t => t.SubTotal).HasColumnType("decimal(18,2)");
         }
     }
 }
