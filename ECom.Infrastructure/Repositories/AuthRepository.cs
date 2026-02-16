@@ -2,7 +2,9 @@
 using ECom.Core.DTO.Auth;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
+using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECom.Infrastructure.Repositories
 {
@@ -12,12 +14,14 @@ namespace ECom.Infrastructure.Repositories
         private readonly IEmailService _emailService;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IGenerateToken _generateToken;
-        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken)
+        private readonly AppDbContext _context;
+        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken, AppDbContext context)
         {
             _userManager = userManager;
             _emailService = emailService;
             _signInManager = signInManager;
             _generateToken = generateToken;
+            _context = context;
         }
 
         public async Task<string> RegisterAsync(RegisterDto registerDto)
@@ -135,6 +139,28 @@ namespace ECom.Infrastructure.Repositories
             }
             
             return result.Errors.FirstOrDefault()?.Description ?? "Failed to activate user";
+        }
+
+        public async Task<bool> UpdateAddress(string email, Address address)
+        {
+            var findUser = await _userManager.FindByEmailAsync(email);
+            if (findUser is null)
+            {
+                return false;
+            }
+
+            var MyAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.AppUserId == findUser.Id);
+            if (MyAddress is null)
+            {
+                await _context.Addresses.AddAsync(address);
+            }
+            else
+            {
+                address.Id = MyAddress.Id;
+                _context.Addresses.Update(address);
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 } 

@@ -1,6 +1,8 @@
 ﻿
 
+
 using ECom.Core.DTO.Auth;
+using ECom.Core.Entities;
 
 namespace ECom.Core.Interfaces
 {
@@ -10,7 +12,9 @@ namespace ECom.Core.Interfaces
         Task<string> LoginAsync(LoginDto loginDto);
         Task SendEmail(string email, string code, string component, string subject, string message);
         Task<bool> SendEmailForForgetPassword(string email);
-        public Task<string> ResetPassword(ResetPasswordDto resetPasswordDto);
-        public Task<string> ActiveEmail(ActiveEmailDto activeEmailDto);
+        Task<string> ResetPassword(ResetPasswordDto resetPasswordDto);
+        Task<string> ActiveEmail(ActiveEmailDto activeEmailDto);
+        Task<bool> UpdateAddress(string email , Address address);
+      
     }
 }
