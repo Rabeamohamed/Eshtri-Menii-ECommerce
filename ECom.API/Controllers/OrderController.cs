@@ -36,15 +36,17 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> GetOrdersFOrUser()
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var orders = _orderService.GetAllOrdersForUserAsync(email);
+            var orders = await _orderService.GetAllOrdersForUserAsync(email);
             return Ok(orders);
         }
 
-        [HttpGet("get-order-by-id")]
+        [HttpGet("get-order-by-id/{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var order = _orderService.GetOrderByIdAsync(id, email);
+            var order = await _orderService.GetOrderByIdAsync(id, email);
+            if (order == null)
+                return NotFound(new { message = "Order not found" });
             return Ok(order);
         }
         [HttpGet("get-delivery")]

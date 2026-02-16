@@ -47,23 +47,25 @@ namespace ECom.Infrastructure.Service
             return order;
         }
 
-        public async Task<IReadOnlyList<Orders>> GetAllOrdersForUserAsync(string BuyerEmail)
+        public async Task<IReadOnlyList<OrderToReturnDto>> GetAllOrdersForUserAsync(string BuyerEmail)
         {
             var orders = await _context.Orders.Where( O=> O.BuyerEmail == BuyerEmail)
                 .Include(OI => OI.OrderItems).Include(D => D.DeliveryMethod)
                 .ToListAsync();
-            return orders;
+            var result = _mapper.Map<IReadOnlyList<OrderToReturnDto>>(orders);
+            return result;
         }
 
         public async Task<IReadOnlyList<DeliveryMethod>> GetDeliveryMethodAsync()
         => await _context.DeliveryMethods.AsNoTracking().ToListAsync();
 
-        public async Task<Orders> GetOrderByIdAsync(int id, string BuyerEmail)
+        public async Task<OrderToReturnDto> GetOrderByIdAsync(int id, string BuyerEmail)
         {
             var order = await _context.Orders.Where(O => O.Id == id && O.BuyerEmail == BuyerEmail)
                 .Include(OI => OI.OrderItems).Include(D => D.DeliveryMethod)
                 .FirstOrDefaultAsync();
-            return order;
+            var result = _mapper.Map<OrderToReturnDto>(order);
+            return result;
         }
     }
 }
