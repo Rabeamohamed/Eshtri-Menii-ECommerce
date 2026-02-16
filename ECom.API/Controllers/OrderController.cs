@@ -30,7 +30,26 @@ namespace ECom.API.Controllers
 
             if (order is null) return BadRequest(new { Message = "Problem creating order" });
             return Ok(order);
-            //return Ok(new ResponseAPI(200,order);
         }
+
+        [HttpGet("get-orders-for-user")]
+        public async Task<IActionResult> GetOrdersFOrUser()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var orders = _orderService.GetAllOrdersForUserAsync(email);
+            return Ok(orders);
+        }
+
+        [HttpGet("get-order-by-id")]
+        public async Task<IActionResult> GetOrderById(int id)
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var order = _orderService.GetOrderByIdAsync(id, email);
+            return Ok(order);
+        }
+        [HttpGet("get-delivery")]
+        public async Task<IActionResult> GetDeliver()
+        => Ok(await _orderService.GetDeliveryMethodAsync());
+        
     }
 }
