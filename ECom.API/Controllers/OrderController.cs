@@ -28,6 +28,7 @@ namespace ECom.API.Controllers
 
             var order = await _orderService.CreateOrderAsync(orderDto, email);
 
+            if (order is null) return BadRequest(new { Message = "Problem creating order" });
             return Ok(order);
             //return Ok(new ResponseAPI(200,order);
         }
