@@ -22,12 +22,16 @@ namespace ECom.Infrastructure
         public static IServiceCollection InfrastructureConfiguration(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            service.AddHttpContextAccessor();
 
             // Applying Unit of Work Pattern
             service.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Registering Email Service
             service.AddScoped<IEmailService, EmailService>();
+
+            //Register Order Service 
+            service.AddScoped<IOrderService, OrderService>();
 
             // Registering Token
             service.AddScoped<IGenerateToken, GenerateToken>();
@@ -59,7 +63,7 @@ namespace ECom.Infrastructure
              {
                  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
              })
                 
                 .AddCookie(o =>
@@ -90,17 +94,14 @@ namespace ECom.Infrastructure
                      OnMessageReceived = context =>
                      {
                          var token = context.Request.Cookies["token"];
-                         //if (!string.IsNullOrEmpty(token))
-                         //{
-                         //    context.Token = token;
-                         //}
+                         if (!string.IsNullOrEmpty(token))
+                         {
+                             context.Token = token;
+                         }
                          return Task.CompletedTask;
                      }
                  };
              });
-
-
-
 
             return service;
         }

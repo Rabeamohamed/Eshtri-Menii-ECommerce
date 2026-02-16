@@ -43,6 +43,7 @@ namespace ECom.Infrastructure.Service
 
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
+            await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(orderDto.BasketId);
             return order;
         }
 

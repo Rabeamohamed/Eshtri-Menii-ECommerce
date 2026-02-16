@@ -47,8 +47,7 @@ namespace ECom.Infrastructure.Repositories
                 </head>
                     <body>
                         <h1> Welcome to ECom, {email}!</h1>
-                        <h1> {message}</h1> <hr> <br>
-                            <a class=""button"" href=""http://localhost:4200/Account/component?email={email}&code={encodedToken} "">{message}</a>
+                            <a class=""button"" href=""https://localhost:7076/api/Account/activate-email?email={email}&code={encodedToken}"">{message}</a>
                     </body>
                 </head>
             </html>

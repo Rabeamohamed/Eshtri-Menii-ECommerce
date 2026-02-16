@@ -117,21 +117,24 @@ namespace ECom.Infrastructure.Repositories
             return result.Errors.ToList()[0].Description;
         }
 
-        public async Task<bool> ActiveEmail(ActiveEmailDto activeEmailDto)
+        public async Task<string> ActiveEmail(ActiveEmailDto activeEmailDto)
         {
             var user = await _userManager.FindByEmailAsync(activeEmailDto.Email);
             if (user is null)
             {
-                return false;
+                return "User not found";
+            }
+            if (await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return "User Already Active";
             }
             var result = await _userManager.ConfirmEmailAsync(user, activeEmailDto.Token);
             if (result.Succeeded)
             {
-                return result.Succeeded;
+                return "User Active Successfully";
             }
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await SendEmail(user.Email, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
-            return false;
+            
+            return result.Errors.FirstOrDefault()?.Description ?? "Failed to activate user";
         }
     }
 } 
