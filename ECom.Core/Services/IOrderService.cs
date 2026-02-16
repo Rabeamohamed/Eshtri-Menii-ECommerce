@@ -13,6 +13,6 @@ namespace ECom.Core.Services
         Task<Orders> CreateOrderAsync(OrderDto orderDto,string BuyerEmail);
         Task<IReadOnlyList<Orders>> GetAllOrdersForUserAsync(string BuyerEmail); 
         Task<Orders> GetOrderByIdAsync(int  id,string BuyerEmail);
-        Task<IReadOnlyList<DeliveryMethod>> GetDealMethodAsync();
+        Task<IReadOnlyList<DeliveryMethod>> GetDeliveryMethodAsync();
     }
 }

@@ -39,7 +39,7 @@ namespace ECom.Infrastructure.Service
             var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
 
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
-            var order = new Orders(BuyerEmail, subTotal, shippingAddress, deliveryMethod, orderItems);
+            var order = new Orders(BuyerEmail, subTotal, shippingAddress, deliveryMethod, orderItems); // Error Here
 
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
@@ -47,19 +47,23 @@ namespace ECom.Infrastructure.Service
             return order;
         }
 
-        public Task<IReadOnlyList<Orders>> GetAllOrdersForUserAsync(string BuyerEmail)
+        public async Task<IReadOnlyList<Orders>> GetAllOrdersForUserAsync(string BuyerEmail)
         {
-            throw new NotImplementedException();
+            var orders = await _context.Orders.Where( O=> O.BuyerEmail == BuyerEmail)
+                .Include(OI => OI.OrderItems).Include(D => D.DeliveryMethod)
+                .ToListAsync();
+            return orders;
         }
 
-        public Task<IReadOnlyList<DeliveryMethod>> GetDealMethodAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IReadOnlyList<DeliveryMethod>> GetDeliveryMethodAsync()
+        => await _context.DeliveryMethods.AsNoTracking().ToListAsync();
 
-        public Task<Orders> GetOrderByIdAsync(int id, string BuyerEmail)
+        public async Task<Orders> GetOrderByIdAsync(int id, string BuyerEmail)
         {
-            throw new NotImplementedException();
+            var order = await _context.Orders.Where(O => O.Id == id && O.BuyerEmail == BuyerEmail)
+                .Include(OI => OI.OrderItems).Include(D => D.DeliveryMethod)
+                .FirstOrDefaultAsync();
+            return order;
         }
     }
 }
