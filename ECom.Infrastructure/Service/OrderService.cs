@@ -15,11 +15,13 @@ namespace ECom.Infrastructure.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
-        public OrderService(IUnitOfWork unitOfWork, AppDbContext context, IMapper mapper)
+        private readonly IPaymentService _paymentService;
+        public OrderService(IUnitOfWork unitOfWork, AppDbContext context, IMapper mapper, IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
             _context = context;
             _mapper = mapper;
+            _paymentService = paymentService;
         }
 
         public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string BuyerEmail)
@@ -39,7 +41,16 @@ namespace ECom.Infrastructure.Service
             var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
 
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
-            var order = new Orders(BuyerEmail, subTotal, shippingAddress, deliveryMethod, orderItems); // Error Here
+
+            var ExistOrder = await _context.Orders.Where(O => O.PaymentIntentId == basket.PaymentIntentId).FirstOrDefaultAsync();
+            if(ExistOrder is not null)
+            {
+                _context.Orders.Remove(ExistOrder);
+                await _paymentService.CreateOrUpdatePaymentAsync(basket.PaymentIntentId, deliveryMethod.Id);
+                await _context.SaveChangesAsync();
+            }
+
+            var order = new Orders(BuyerEmail, subTotal, shippingAddress, deliveryMethod, orderItems,basket.PaymentIntentId); 
 
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();

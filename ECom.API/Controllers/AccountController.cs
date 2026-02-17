@@ -22,7 +22,7 @@ namespace ECom.API.Controllers
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
             var address = mapper.Map<Address>(addressDto);
             var result = await work.AuthRepository.UpdateAddress(email, address);
-            return result? Ok() : BadRequest(); 
+            return result ? Ok() : BadRequest();
 
         }
 
@@ -86,12 +86,27 @@ namespace ECom.API.Controllers
             };
         }
 
-        [HttpGet("send-email-forget-password")]
+        [HttpGet("send-email-forget-password/{email}")]
         public async Task<IActionResult> ForgetPassword(string email)
         {
             var result = await work.AuthRepository.SendEmailForForgetPassword(email);
             return result ? Ok(new ResponseAPI(200)) : BadRequest(new ResponseAPI(400));
 
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            // Decode the token if it's URL-encoded (comes from email link)
+            var decodedDto = new ResetPasswordDto
+            {
+                Email = resetPasswordDto.Email,
+                Password = resetPasswordDto.Password,
+                Token = Uri.UnescapeDataString(resetPasswordDto.Token)
+            };
+            
+            var result = await work.AuthRepository.ResetPassword(decodedDto);
+            return result == "Password Reset and changed Successfully" ? Ok(new ResponseAPI(200, result)) : BadRequest(new ResponseAPI(400, result));
         }
     }
 }

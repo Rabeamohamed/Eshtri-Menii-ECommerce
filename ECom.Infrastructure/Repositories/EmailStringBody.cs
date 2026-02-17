@@ -12,6 +12,16 @@ namespace ECom.Infrastructure.Repositories
         public static string send(string email, string token, string component, string message)
         {
             string encodedToken = Uri.EscapeDataString(token);
+            
+            // Generate different links based on component type
+            string actionLink = component == "Reset-Password" 
+                ? $"https://localhost:4200/reset-password?email={email}&token={encodedToken}"
+                : $"https://localhost:7076/api/Account/activate-email?email={email}&code={encodedToken}";
+            
+            string title = component == "Reset-Password" 
+                ? "Password Reset Request" 
+                : $"Welcome to ECom, {email}!";
+            
             return $@"
             <html> 
                 <head>
@@ -43,13 +53,30 @@ namespace ECom.Infrastructure.Repositories
                             text-decoration: none;
                             border-radius: 5px;
                         }}
+                        .footer {{
+                            margin-top: 20px;
+                            padding: 10px;
+                            font-size: 12px;
+                            color: #666;
+                        }}
                 </style>
                 </head>
                     <body>
-                        <h1> Welcome to ECom, {email}!</h1>
-                            <a class=""button"" href=""https://localhost:7076/api/Account/activate-email?email={email}&code={encodedToken}"">{message}</a>
+                        <div class=""container"">
+                            <div class=""header"">
+                                <h2>ECom Notification</h2>
+                            </div>
+                            <div class=""content"">
+                                <h1>{title}</h1>
+                                <p>{message}</p>
+                                <a class=""button"" href=""{actionLink}"">Click Here</a>
+                                <div class=""footer"">
+                                    <p>If you did not request this action, please ignore this email.</p>
+                                    <p>This link will expire in 24 hours.</p>
+                                </div>
+                            </div>
+                        </div>
                     </body>
-                </head>
             </html>
                     ";
         }
