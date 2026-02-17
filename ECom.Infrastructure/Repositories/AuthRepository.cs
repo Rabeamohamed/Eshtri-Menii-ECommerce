@@ -1,5 +1,6 @@
 ﻿using ECom.Core.DTO;
 using ECom.Core.DTO.Auth;
+using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -141,7 +142,7 @@ namespace ECom.Infrastructure.Repositories
             return result.Errors.FirstOrDefault()?.Description ?? "Failed to activate user";
         }
 
-        public async Task<bool> UpdateAddress(string email, Address address)
+        public async Task<bool> UpdateAddress(string email,Address address)
         {
             var findUser = await _userManager.FindByEmailAsync(email);
             if (findUser is null)

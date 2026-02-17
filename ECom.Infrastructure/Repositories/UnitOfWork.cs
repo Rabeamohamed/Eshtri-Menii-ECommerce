@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ECom.Core.DTO;
+using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -51,7 +52,7 @@ namespace ECom.Infrastructure.Repositories
             ProductRepository = new ProductRepository(context, _mapper, _imageManagementService);
             PhotoRepository = new PhotoRepository(context); // Initialize PhotoRepository
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
-            AuthRepository = new AuthRepository(userManager, _emailService, _signInManager,_generateToken); // Initialize AuthRepository in UnitOfWork constructor
+            AuthRepository = new AuthRepository(userManager, _emailService, _signInManager,_generateToken, _context); // Initialize AuthRepository in UnitOfWork constructor
         }
 
     }

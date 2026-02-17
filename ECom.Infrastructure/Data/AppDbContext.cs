@@ -1,4 +1,5 @@
 ﻿using ECom.Core.DTO;
+using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

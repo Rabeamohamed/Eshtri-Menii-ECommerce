@@ -1,4 +1,5 @@
 ﻿using ECom.Core.DTO;
+using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -35,6 +36,9 @@ namespace ECom.Infrastructure
 
             // Registering Token
             service.AddScoped<IGenerateToken, GenerateToken>();
+
+            //Registering Payment Service
+            service.AddScoped<IPaymentService, PaymentService>();
 
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>
