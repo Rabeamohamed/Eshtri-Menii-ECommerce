@@ -17,5 +17,10 @@ namespace ECom.Core.Entities.Product
         public int CategoryId { get; set; }
         [ForeignKey(nameof(CategoryId))]
         public virtual Category Category { get; set; }
+
+        // For reviews and ratings
+        public double AverageRating { get; set; } = 0.0;
+        public int TotalReviews { get; set; } = 0; // reviews count for calculating average rating
+        public virtual ICollection<Review> Reviews { get; set; }
     }
 }

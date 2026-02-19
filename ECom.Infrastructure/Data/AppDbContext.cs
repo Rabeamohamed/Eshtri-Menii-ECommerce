@@ -26,7 +26,7 @@ namespace ECom.Infrastructure.Data
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<OrderItems> OrderItems { get; set; }
-
+        public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
