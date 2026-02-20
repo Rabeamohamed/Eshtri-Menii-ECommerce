@@ -1,16 +1,9 @@
-﻿using ECom.Core.DTO;
-using ECom.Core.Entities;
+﻿using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Data
 {
