@@ -1,4 +1,4 @@
-﻿namespace ECom.API.Helper
+﻿namespace ECom.Core.Sharing
 {
     public class ResponseAPI
     {

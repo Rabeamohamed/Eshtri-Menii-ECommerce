@@ -2,7 +2,7 @@
 using ECom.Core.DTO;
 using ECom.Core.Entities.Product;
 
-namespace ECom.Infrastructure.Data.Config
+namespace ECom.API.Mapping
 {
     public class PhotoMapping : Profile
     {
