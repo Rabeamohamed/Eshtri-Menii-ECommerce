@@ -1,12 +1,8 @@
 ﻿using ECom.Core.Interfaces;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ECom.Infrastructure.Repositories
 {
@@ -19,19 +15,15 @@ namespace ECom.Infrastructure.Repositories
             _context = context;
         }
         public async Task AddAsync(T entity)
-        {
-            await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
-        }
-
+            =>await _context.Set<T>().AddAsync(entity);
         public async Task<int> CountAsync() 
             => await _context.Set<T>().CountAsync();
 
         public async Task DeleteAsync(int id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
-            _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
+            if (entity is not null)
+                _context.Set<T>().Remove(entity);
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
@@ -67,7 +59,6 @@ namespace ECom.Infrastructure.Repositories
         public async Task UpdateAsync(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
         }
     }
 }

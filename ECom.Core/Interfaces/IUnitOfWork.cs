@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ECom.Core.Interfaces
 {
     public interface IUnitOfWork
@@ -13,6 +8,8 @@ namespace ECom.Core.Interfaces
         public IPhotoRepository PhotoRepository { get;  }
         public ICustomerBasketRepository CustomerBasketRepository { get; }
         public IAuth AuthRepository { get; }
+        public IReviewRepository ReviewRepository { get; }
+        public Task<int> SaveChangesAsync(); // int because return number of affected rows
 
     }
 }
