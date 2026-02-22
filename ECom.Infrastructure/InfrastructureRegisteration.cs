@@ -1,11 +1,9 @@
-﻿using ECom.Core.DTO;
-using ECom.Core.Entities;
+﻿using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -40,6 +38,9 @@ namespace ECom.Infrastructure
             //Registering Payment Service
             service.AddScoped<IPaymentService, PaymentService>();
 
+            // Registering Review Service
+            service.AddScoped<IReviewService, ReviewService>();
+
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>
             {
@@ -51,7 +52,7 @@ namespace ECom.Infrastructure
             // Register IFileProvider for ImageManagementService
             service.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
 
-            service.AddSingleton<IImageManagementService, ImgeManagementService>();
+            service.AddSingleton<IImageManagementService, ImageManagementService>();
 
             // Apply DbContext Registration
             service.AddDbContext<AppDbContext>(options => {

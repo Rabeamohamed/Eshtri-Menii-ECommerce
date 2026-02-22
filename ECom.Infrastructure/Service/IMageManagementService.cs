@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Service
 {
-    public class ImgeManagementService : IImageManagementService
+    public class ImageManagementService : IImageManagementService
     {
         private readonly IFileProvider fileProvider;
-        public ImgeManagementService(IFileProvider fileProvider)
+        public ImageManagementService(IFileProvider fileProvider)
         {
             this.fileProvider = fileProvider;
         }

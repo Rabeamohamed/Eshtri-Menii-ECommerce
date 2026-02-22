@@ -1,9 +1,6 @@
-﻿using ECom.API.Helper;
-using ECom.Core.DTO.Order;
+﻿using ECom.Core.DTO.Order;
 using ECom.Core.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 

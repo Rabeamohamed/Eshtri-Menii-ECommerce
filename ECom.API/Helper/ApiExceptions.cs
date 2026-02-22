@@ -1,4 +1,6 @@
-﻿namespace ECom.API.Helper
+﻿using ECom.Core.Sharing;
+
+namespace ECom.API.Helper
 {
     public class ApiExceptions : ResponseAPI
     {

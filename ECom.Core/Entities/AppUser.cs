@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-
 namespace ECom.Core.Entities
 {
     public class AppUser :IdentityUser

@@ -11,7 +11,9 @@ namespace ECom.API.Mapping
             // Review → ReviewDto
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.UserName,
-                    opt => opt.MapFrom(src => src.User.UserName));
+        opt => opt.MapFrom(src => src.User != null
+                    ? src.User.UserName
+                    : "Unknown"));
 
             // CreateReviewDto → Review
             CreateMap<CreateReviewDto, Review>()

@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using ECom.API.Helper;
 using ECom.Core.DTO.Auth;
 using ECom.Core.DTO.Order;
 using ECom.Core.Entities;
 using ECom.Core.Interfaces;
-using Microsoft.AspNetCore.Http;
+using ECom.Core.Sharing;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
