@@ -38,7 +38,7 @@ namespace ECom.Infrastructure.Service
             }
 
             // 3. Check if user already reviewed this product
-            var hasReviewed = await _unitOfWork.ReviewRepository.HasUserReviewedProductAsync(dto.ProductId, userEmail);
+            var hasReviewed = await _unitOfWork.ReviewRepository.HasUserReviewedProductAsync(dto.ProductId, userId);
             if(hasReviewed)
             {
                 return new ResponseAPI(400, "You have already reviewed this product");

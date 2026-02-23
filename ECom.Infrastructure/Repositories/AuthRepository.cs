@@ -1,5 +1,4 @@
-﻿using ECom.Core.DTO;
-using ECom.Core.DTO.Auth;
+﻿using ECom.Core.DTO.Auth;
 using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;

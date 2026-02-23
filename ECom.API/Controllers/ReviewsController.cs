@@ -56,12 +56,6 @@ namespace ECom.API.Controllers
                     404 => NotFound(result),
                     _ => BadRequest(result)
                 };
-
-                //if (result.StatusCode != 200)
-                //{
-                //    return BadRequest(result);
-                //}
-                //return Ok(result);
             }
             catch (Exception ex)
             {
