@@ -53,6 +53,8 @@ namespace ECom.Infrastructure.Repositories
                 return result.Errors.ToList()[0].Description;
             }
 
+            await _userManager.AddToRoleAsync(user, "Customer");
+
             // Send Actice or Confirmation Email
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await SendEmail(user.Email, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
@@ -77,6 +79,9 @@ namespace ECom.Infrastructure.Repositories
                 return null;
             }
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            if (user is null)
+                return "Email or Password is incorrect";
+
             if (!user.EmailConfirmed)
             {
                 string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -88,7 +93,7 @@ namespace ECom.Infrastructure.Repositories
 
             if (result.Succeeded)
             {
-                return _generateToken.GetAndGenerateToken(user);
+                return await _generateToken.GetAndGenerateToken(user);
             }
 
             return "Please Check your E-mail or Password , Something went wrong";

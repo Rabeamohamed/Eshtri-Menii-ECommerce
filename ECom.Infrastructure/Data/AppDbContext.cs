@@ -1,6 +1,7 @@
 ﻿using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -26,6 +27,13 @@ namespace ECom.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Seed Roles
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole { Id = "1", Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole { Id = "2", Name = "Customer", NormalizedName = "CUSTOMER" },
+                new IdentityRole { Id = "3", Name = "Vendor", NormalizedName = "VENDOR" }
+                );
         }
     }
 }

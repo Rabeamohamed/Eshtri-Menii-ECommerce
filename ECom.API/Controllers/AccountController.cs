@@ -4,6 +4,7 @@ using ECom.Core.DTO.Order;
 using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Sharing;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,6 +16,7 @@ namespace ECom.API.Controllers
         {
         }
 
+        [Authorize]
         [HttpPut("update-address")]
         public async Task<IActionResult> UpdateAddress(ShippingAddressDto addressDto)
         {
@@ -40,7 +42,8 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
             var result = await work.AuthRepository.LoginAsync(loginDto);
-
+            if (result is null)
+                return BadRequest(new ResponseAPI(400, "Email or Password is incorrect"));
             if (result.StartsWith("Please"))
             {
                 return BadRequest(new ResponseAPI(400, result));
@@ -94,7 +97,7 @@ namespace ECom.API.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             // Decode the token if it's URL-encoded (comes from email link)
             var decodedDto = new ResetPasswordDto
