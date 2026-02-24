@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ECom.Core.DTO.Order;
 using ECom.Core.Entities.Order;
+using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -23,38 +24,70 @@ namespace ECom.Infrastructure.Service
             _mapper = mapper;
             _paymentService = paymentService;
         }
-
-        public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string BuyerEmail)
+        public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string buyerEmail)
         {
             var basket = await _unitOfWork.CustomerBasketRepository.GetBasketAsync(orderDto.BasketId);
 
-            List<OrderItems> orderItems = new List<OrderItems>();
-
-            foreach(var item in basket.BasketItems)
+            // Fetch all products ONCE
+            var products = new Dictionary<int, Product>();
+            foreach (var item in basket.BasketItems)
             {
-                var Product = await _unitOfWork.ProductRepository.GetByIdAsync(item.Id);
-                var OrderItems = new OrderItems(Product.Id,item.Image,
-                    Product.Name,item.Price,item.Quantity);
-                orderItems.Add(OrderItems);
+                var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.Id);
+                if (product is null)
+                    throw new Exception("Product not found");
+                products[item.Id] = product;
             }
-            var deliveryMethod = await _context.DeliveryMethods.FirstOrDefaultAsync(d => d.Id == orderDto.DeliveryMethodId);    
-            var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
 
+            // 1 — Validate stock using cached products
+            foreach (var item in basket.BasketItems)
+            {
+                var product = products[item.Id];
+                if (product.StockQuantity < item.Quantity)
+                    throw new Exception($"'{product.Name}' only has {product.StockQuantity} items in stock");
+            }
+
+            // 2 — Build order items using cached products
+            var orderItems = basket.BasketItems.Select(item =>
+            {
+                var product = products[item.Id];
+                return new OrderItems(product.Id, item.Image, product.Name, item.Price, item.Quantity);
+            }).ToList();
+
+            var deliveryMethod = await _context.DeliveryMethods
+                .FirstOrDefaultAsync(d => d.Id == orderDto.DeliveryMethodId);
+
+            var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
 
-            var ExistOrder = await _context.Orders.Where(O => O.PaymentIntentId == basket.PaymentIntentId).FirstOrDefaultAsync();
-            if(ExistOrder is not null)
+            // 3 — Handle existing order
+            var existOrder = await _context.Orders
+                .Where(o => o.PaymentIntentId == basket.PaymentIntentId)
+                .FirstOrDefaultAsync();
+
+            if (existOrder is not null)
             {
-                _context.Orders.Remove(ExistOrder);
+                _context.Orders.Remove(existOrder);
                 await _paymentService.CreateOrUpdatePaymentAsync(basket.PaymentIntentId, deliveryMethod.Id);
                 await _context.SaveChangesAsync();
             }
 
-            var order = new Orders(BuyerEmail, subTotal, shippingAddress, deliveryMethod, orderItems,basket.PaymentIntentId); 
-
+            //  4 — Create order
+            var order = new Orders(buyerEmail, subTotal, shippingAddress,
+                deliveryMethod, orderItems, basket.PaymentIntentId);
             await _context.Orders.AddAsync(order);
+
+            //5 — Decrement stock using cached products
+            foreach (var item in basket.BasketItems)
+            {
+                var product = products[item.Id];
+                product.StockQuantity -= item.Quantity;
+                _context.Products.Update(product);
+            }
+
+            // Single SaveChanges — order + stock decrement in one transaction
             await _context.SaveChangesAsync();
             await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(orderDto.BasketId);
+
             return order;
         }
 

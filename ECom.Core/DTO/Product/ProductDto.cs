@@ -15,6 +15,10 @@ namespace ECom.Core.DTO.Product
         public decimal NewPrice { get; init; }
         public List<PhotoDto> Photos { get; init; }
         public string CategoryName { get; init; }
+        public double AverageRating { get; init; }
+        public int TotalReviews { get; init; }
+        public int StockQuantity { get; init; }
+        public bool InStock { get; init; }
     }
 
 

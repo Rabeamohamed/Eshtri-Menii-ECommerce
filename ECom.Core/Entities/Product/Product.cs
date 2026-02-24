@@ -18,5 +18,10 @@ namespace ECom.Core.Entities.Product
         public double AverageRating { get; set; } = 0.0;
         public int TotalReviews { get; set; } = 0; // reviews count for calculating average rating
         public virtual ICollection<Review> Reviews { get; set; }
+
+        // For Inventory & Stock management
+        public int StockQuantity { get; set; } = 0;
+        public bool InStock => StockQuantity > 0;
+
     }
 }
