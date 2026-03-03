@@ -86,7 +86,7 @@ namespace ECom.Infrastructure.Service
 
             // Single SaveChanges — order + stock decrement in one transaction
             await _context.SaveChangesAsync();
-            await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(orderDto.BasketId)
+            await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(orderDto.BasketId);
             return order;
         }
 
