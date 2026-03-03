@@ -9,6 +9,7 @@ namespace ECom.Core.Interfaces
         public ICustomerBasketRepository CustomerBasketRepository { get; }
         public IAuth AuthRepository { get; }
         public IReviewRepository ReviewRepository { get; }
+        public IWishlistRepository WishlistRepository { get; }
         public Task<int> SaveChangesAsync(); // int because return number of affected rows
 
     }
