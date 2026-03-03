@@ -8,7 +8,7 @@ namespace ECom.Core.DTO.Product
 {
     public record ProductDto
     {
-        public int Id { get; set; }
+        public int Id { get; init; }
         public string Name { get; init; }
         public string Description { get; init; }
         public decimal OldPrice { get; init; }

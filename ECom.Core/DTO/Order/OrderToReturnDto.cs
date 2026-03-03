@@ -9,14 +9,14 @@ namespace ECom.Core.DTO.Order
 {
     public record OrderToReturnDto
     {
-        public int Id { get; set; }
-        public string BuyerEmail { get; set; }
-        public decimal SubTotal { get; set; }
-        public decimal Total { get; set; }
-        public DateTime OrderDate { get; set; }
-        public ShippingAddress ShippingAddress { get; set; }
-        public string DeliveryMethod { get; set; }
-        public IReadOnlyList<OrderItemsDto> OrderItems { get; set; }
-        public string Status { get; set; }
+        public int Id { get; init; }
+        public string BuyerEmail { get; init; }
+        public decimal SubTotal { get; init; }
+        public decimal Total { get; init; }
+        public DateTime OrderDate { get; init; }
+        public ShippingAddress ShippingAddress { get; init; }
+        public string DeliveryMethod { get; init; }
+        public IReadOnlyList<OrderItemsDto> OrderItems { get; init; }
+        public string Status { get; init; }
     }
 }

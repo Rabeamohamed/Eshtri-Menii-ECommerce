@@ -8,8 +8,8 @@ namespace ECom.Core.DTO.Product
         public string Description { get; init; }
         public decimal OldPrice { get; init; }
         public decimal NewPrice { get; init; }
-        public int CategoryId { get; set; }
+        public int CategoryId { get; init; }
         public IFormFileCollection Photo { get; init; }
-        public int StockQuantity { get; set; }
+        public int StockQuantity { get; init; }
     }
 }

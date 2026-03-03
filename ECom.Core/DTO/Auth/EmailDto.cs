@@ -12,10 +12,10 @@ namespace ECom.Core.DTO.Auth
             Content = content;
         }
 
-        public string To { get; set; }
-        public string From { get; set; }
-        public string Subject { get; set; }
-        public string Content { get; set; }
+        public string To { get; init; }
+        public string From { get; init; }
+        public string Subject { get; init; }
+        public string Content { get; init; }
 
     }
 }

@@ -3,11 +3,11 @@ namespace ECom.Core.DTO.Order
 {
     public record ShippingAddressDto
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string City { get; set; }
-        public string ZipCode { get; set; }
-        public string Street { get; set; }
-        public string State { get; set; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public string City { get; init; }
+        public string ZipCode { get; init; }
+        public string Street { get; init; }
+        public string State { get; init; }
     }
 }
