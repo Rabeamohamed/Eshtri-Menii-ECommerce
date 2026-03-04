@@ -10,7 +10,7 @@ namespace ECom.Core.Interfaces
         // Get all wishlist items for a user
         Task<IReadOnlyList<WishlistDto>> GetUserWishlistAsync(string userId);
         // Check if product already in wishlist
-        Task<bool> IsProductInWishlist (int productId, string userId);
+        Task<bool> IsProductInWishlistAsync (int productId, string userId);
         // Get single wishlist item
         Task<Wishlist> GetWishlistItemAsync(int productId, string userId);
 

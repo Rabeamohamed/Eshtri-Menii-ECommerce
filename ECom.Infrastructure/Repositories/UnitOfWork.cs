@@ -39,6 +39,8 @@ namespace ECom.Infrastructure.Repositories
 
         public IReviewRepository ReviewRepository { get; }
 
+        public IWishlistRepository WishlistRepository { get; }
+
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService
             , IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken)
         {
@@ -56,6 +58,7 @@ namespace ECom.Infrastructure.Repositories
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
             AuthRepository = new AuthRepository(userManager, _emailService, _signInManager,_generateToken, _context); // Initialize AuthRepository in UnitOfWork constructor
             ReviewRepository = new ReviewRepository(context, _mapper);
+            WishlistRepository = new WishlistRepository(context, _mapper);
         }
 
         public async Task<int> SaveChangesAsync()

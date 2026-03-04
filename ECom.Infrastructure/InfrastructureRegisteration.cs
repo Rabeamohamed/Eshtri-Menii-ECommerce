@@ -41,6 +41,9 @@ namespace ECom.Infrastructure
             // Registering Review Service
             service.AddScoped<IReviewService, ReviewService>();
 
+            // Registering Wishlist Service
+            service.AddScoped<IWishlistService, WishlistService>();
+
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>
             {
