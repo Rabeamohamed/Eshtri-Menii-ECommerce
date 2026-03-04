@@ -1,6 +1,4 @@
-﻿
-
-using ECom.Core.Entities;
+﻿using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -21,13 +19,13 @@ namespace ECom.Infrastructure.Service
             _work = work;
             _configuration = configuration;
             _context = context;
+            StripeConfiguration.ApiKey = _configuration["StripSettings:SecretKey"];
         }
 
 
         public async Task<CustomerBasket> CreateOrUpdatePaymentAsync(string basketId, int? deliveryMethodId)
         {
            var basket = await _work.CustomerBasketRepository.GetBasketAsync(basketId);
-           StripeConfiguration.ApiKey= _configuration["StripSettings:SecretKey"];
 
            decimal shippingPrice = 0m;
            if(deliveryMethodId.HasValue)
@@ -67,6 +65,20 @@ namespace ECom.Infrastructure.Service
             }
               await _work.CustomerBasketRepository.UpdateBasketAsync(basket);
                 return basket;
+        }
+
+        public async Task<bool> RefundPaymentAsync(string paymentIntentId)
+        {
+            var refundOptions = new RefundCreateOptions
+            {
+                PaymentIntent = paymentIntentId,
+                Reason = RefundReasons.RequestedByCustomer
+            };
+
+            var refundService = new RefundService();
+            var refund = await refundService.CreateAsync(refundOptions);
+
+            return refund.Status == "succeeded" || refund.Status == "pending";
         }
     }
 }

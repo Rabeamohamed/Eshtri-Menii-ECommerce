@@ -1,5 +1,6 @@
 ﻿using ECom.Core.DTO.Order;
 using ECom.Core.Entities.Order;
+using ECom.Core.Sharing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,7 @@ namespace ECom.Core.Services
         Task<IReadOnlyList<OrderToReturnDto>> GetAllOrdersForUserAsync(string BuyerEmail); 
         Task<OrderToReturnDto> GetOrderByIdAsync(int  id,string BuyerEmail);
         Task<IReadOnlyList<DeliveryMethod>> GetDeliveryMethodAsync();
+        Task<ResponseAPI> CancelOrderAsync(int orderId, string buyerEmail, bool isAdmin);
+
     }
 }

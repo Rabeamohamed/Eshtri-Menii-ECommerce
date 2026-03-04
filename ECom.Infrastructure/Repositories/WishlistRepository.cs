@@ -45,7 +45,7 @@ namespace ECom.Infrastructure.Repositories
                 .FirstOrDefaultAsync(w => w.ProductId == productId && w.UserId == userId);
         }
 
-        public async Task<bool> IsProductInWishlist(int productId, string userId)
+        public async Task<bool> IsProductInWishlistAsync(int productId, string userId)
         {
             return await _context.Wishlists
                 .AnyAsync(w => w.ProductId == productId && w.UserId == userId);

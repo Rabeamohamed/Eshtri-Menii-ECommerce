@@ -4,6 +4,7 @@ using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
+using ECom.Core.Sharing;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -90,6 +91,61 @@ namespace ECom.Infrastructure.Service
             return order;
         }
 
+        public async Task<ResponseAPI> CancelOrderAsync(int orderId, string buyerEmail, bool isAdmin)
+        {
+            // 1. Get order with items
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order is null)
+                return new ResponseAPI(404, "Order not found");
+
+            // 2. Verify ownership — customer can only cancel their own orders
+            if (!isAdmin && order.BuyerEmail != buyerEmail)
+                return new ResponseAPI(403, "You are not allowed to cancel this order");
+
+            // 3. Check cancellation rules based on status
+            if (order.Status == PaymentStatus.PaymentFailed)
+                return new ResponseAPI(400, "Failed orders cannot be cancelled");
+
+            if (order.Status == PaymentStatus.Cancelled)
+                return new ResponseAPI(400, "Order is already cancelled");
+
+            // 4. Customer can only cancel Pending orders
+            if (!isAdmin && order.Status == PaymentStatus.PaymentReceived)
+                return new ResponseAPI(400, "Paid orders can only be cancelled by admin");
+
+            // 5. Handle Stripe refund for paid orders
+            if (order.Status == PaymentStatus.PaymentReceived)
+            {
+                var refundSuccess = await _paymentService.RefundPaymentAsync(order.PaymentIntentId);
+                if (!refundSuccess)
+                    return new ResponseAPI(400, "Failed to process refund — please try again");
+            }
+
+            // 6. Restore stock for each order item
+            foreach (var item in order.OrderItems)
+            {
+                var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductItemId);
+                if (product is not null)
+                {
+                    product.StockQuantity += item.Quantity;
+                    _context.Products.Update(product);
+                }
+            }
+
+            // 7. Update order status
+            order.Status = PaymentStatus.Cancelled;
+            _context.Orders.Update(order);
+
+            // 8. Save everything in one transaction
+            await _context.SaveChangesAsync();
+
+            return new ResponseAPI(200, order.Status == PaymentStatus.PaymentReceived
+                ? "Order cancelled and refund initiated successfully"
+                : "Order cancelled successfully");
+        }
         public async Task<IReadOnlyList<OrderToReturnDto>> GetAllOrdersForUserAsync(string BuyerEmail)
         {
             var orders = await _context.Orders.Where( O=> O.BuyerEmail == BuyerEmail)
@@ -110,5 +166,6 @@ namespace ECom.Infrastructure.Service
             var result = _mapper.Map<OrderToReturnDto>(order);
             return result;
         }
+
     }
 }

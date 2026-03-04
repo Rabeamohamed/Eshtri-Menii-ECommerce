@@ -62,6 +62,53 @@ namespace ECom.API.Controllers
         [HttpGet("get-delivery")]
         public async Task<IActionResult> GetDeliver()
         => Ok(await _orderService.GetDeliveryMethodAsync());
-        
+
+        // Customer cancel — only Pending orders
+        [Authorize]
+        [HttpPut("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: false);
+
+                return result.StatusCode switch
+                {
+                    200 => Ok(result),
+                    404 => NotFound(result),
+                    403 => StatusCode(403, result),
+                    _ => BadRequest(result)
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(400, ex.Message));
+            }
+        }
+
+        // Admin cancel — any order
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admin-cancel/{orderId}")]
+        public async Task<IActionResult> AdminCancelOrder(int orderId)
+        {
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: true);
+
+                return result.StatusCode switch
+                {
+                    200 => Ok(result),
+                    404 => NotFound(result),
+                    403 => StatusCode(403, result),
+                    _ => BadRequest(result)
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(400, ex.Message));
+            }
+        }
     }
 }
