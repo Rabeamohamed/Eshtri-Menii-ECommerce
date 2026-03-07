@@ -48,6 +48,14 @@ app.UseStatusCodePagesWithReExecute("/errors/{0}"); // Global Error Handling Mid
 
 app.UseHttpsRedirection();
 
+
+// Stripe Webhook Endpoint Middleware — must be before MapControllers to allow raw body reading for signature verification
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/payment/webhook"))
+        context.Request.EnableBuffering();
+    await next();
+});
 app.MapControllers();
 
 app.Run();

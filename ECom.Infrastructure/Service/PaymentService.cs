@@ -1,4 +1,5 @@
 ﻿using ECom.Core.Entities;
+using ECom.Core.Entities.Order;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
 using ECom.Infrastructure.Data;
@@ -79,6 +80,18 @@ namespace ECom.Infrastructure.Service
             var refund = await refundService.CreateAsync(refundOptions);
 
             return refund.Status == "succeeded" || refund.Status == "pending";
+        }
+
+        public async Task UpdateOrderPaymentStatusAsync(string paymentIntentId, PaymentStatus status)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+
+            if (order is null) return;
+
+            order.Status = status;
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ECom.API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
-        private readonly IMapper _mapper; // ✅ add this
+        private readonly IMapper _mapper;
         public OrderController(IOrderService orderService, IMapper mapper)
         {
             _orderService = orderService;
