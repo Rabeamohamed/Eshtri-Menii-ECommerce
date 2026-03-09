@@ -1,7 +1,10 @@
 ﻿
-
 namespace ECom.Core.DTO.Category
 {
-    public record CategoryDto(string Name,string Description);
-    public record UpdateCategoryDto(int Id,string Name,string Description);
+    public record CategoryDto
+    {
+        public int Id { get; init; }
+        public string Name { get; init; }
+        public string Description { get; init; }
+    }
 }
