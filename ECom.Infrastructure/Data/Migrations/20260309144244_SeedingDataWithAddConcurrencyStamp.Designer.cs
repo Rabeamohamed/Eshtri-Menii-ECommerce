@@ -4,6 +4,7 @@ using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECom.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309144244_SeedingDataWithAddConcurrencyStamp")]
+    partial class SeedingDataWithAddConcurrencyStamp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,24 +282,6 @@ namespace ECom.Infrastructure.Data.Migrations
                             Id = 1,
                             Description = "Description Test",
                             Name = "Test Category"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Electornics Description",
-                            Name = "Electronics"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Cloths Description",
-                            Name = "Clothing"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Books Description",
-                            Name = "Books"
                         });
                 });
 
