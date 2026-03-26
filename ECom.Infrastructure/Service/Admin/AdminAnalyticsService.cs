@@ -1,4 +1,4 @@
-﻿using ECom.Core.Interfaces.Admin;
+﻿using ECom.Core.Services.Admin;
 namespace ECom.Infrastructure.Service.Admin
 {
     public class AdminAnalyticsService : IAdminAnalyticsService

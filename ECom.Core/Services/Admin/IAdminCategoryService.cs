@@ -1,8 +1,7 @@
-﻿
-using ECom.Core.DTO.Category;
+﻿using ECom.Core.DTO.Category;
 using ECom.Core.Sharing;
 
-namespace ECom.Core.Interfaces.Admin
+namespace ECom.Core.Services.Admin
 {
     public interface IAdminCategoryService
     {

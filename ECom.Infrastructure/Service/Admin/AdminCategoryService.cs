@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ECom.Core.DTO.Category;
 using ECom.Core.Interfaces;
-using ECom.Core.Interfaces.Admin;
+using ECom.Core.Services.Admin;
 using ECom.Core.Sharing;
 namespace ECom.Infrastructure.Service.Admin
 {
