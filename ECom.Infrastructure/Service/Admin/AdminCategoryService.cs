@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ECom.Core.DTO.Category;
+using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
 using ECom.Core.Services.Admin;
 using ECom.Core.Sharing;
@@ -14,14 +15,34 @@ namespace ECom.Infrastructure.Service.Admin
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public Task<ResponseAPI> CreateCategoryAsync(AddCategoryDto dto)
+        public async Task<ResponseAPI> CreateCategoryAsync(AddCategoryDto dto)
         {
-            throw new NotImplementedException();
+            var category = _mapper.Map<Category>(dto);
+
+            await _unitOfWork.CategoryRepository.AddAsync(category);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if(result <= 0)
+            {
+                return new ResponseAPI(400, "Failed to create category");
+            }
+            return new ResponseAPI(201, "Category created successfully");
+
         }
 
-        public Task<ResponseAPI> DeleteCategoryAsync(int id)
+        public async Task<ResponseAPI> DeleteCategoryAsync(int id)
         {
-            throw new NotImplementedException();
+            var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
+            if(category is null)
+            {
+                return new ResponseAPI(404, "Category not found");
+            }
+            await _unitOfWork.CategoryRepository.DeleteAsync(id);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result <= 0)
+            {
+                return new ResponseAPI(400, "Failed to delete category");
+            }
+            return new ResponseAPI(200, "Category deleted successfully");
         }
 
         public async Task<IReadOnlyList<CategoryDto>> GetAllCategoriesAsync()
@@ -40,9 +61,21 @@ namespace ECom.Infrastructure.Service.Admin
             return _mapper.Map<Task<CategoryDto>>(category);
         }
 
-        public Task<ResponseAPI> UpdateCategoryAsync(UpdateCategoryDto dto)
+        public async Task<ResponseAPI> UpdateCategoryAsync(UpdateCategoryDto dto)
         {
-            throw new NotImplementedException();
+            var category = await _unitOfWork.CategoryRepository.GetByIdAsync(dto.Id);
+            if(category is null)
+            {
+                return new ResponseAPI(404, "Category not found");
+            }
+            _mapper.Map(dto, category);
+            await _unitOfWork.CategoryRepository.UpdateAsync(category);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if(result <= 0)
+            {
+                return new ResponseAPI(400, "Failed to update category");
+            }
+            return new ResponseAPI(200, "Category updated successfully");
         }
     }
 }
