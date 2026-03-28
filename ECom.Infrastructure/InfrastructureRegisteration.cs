@@ -1,9 +1,11 @@
 ﻿using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using ECom.Core.Services;
+using ECom.Core.Services.Admin;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;
+using ECom.Infrastructure.Service.Admin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +45,16 @@ namespace ECom.Infrastructure
 
             // Registering Wishlist Service
             service.AddScoped<IWishlistService, WishlistService>();
+
+            // Registering Admin Services
+            service.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
+            service.AddScoped<IAdminCategoryService, AdminCategoryService>();
+            service.AddScoped<IAdminProductService, AdminProductService>();
+            service.AddScoped<IAdminOrderService, AdminOrderService>();
+            service.AddScoped<IAdminUserService, AdminUserService>();
+
+
+
 
             // Apply Redis Connection for Caching
             service.AddSingleton<IConnectionMultiplexer>(i =>
