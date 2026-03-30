@@ -46,7 +46,7 @@ namespace ECom.Infrastructure.Service.Admin
                 return null;
             return _mapper.Map<ProductDto>(product);
         }
-        public async Task<int> GetTotalCount()
+        public async Task<int> GetTotalCountAsync()
             => await _unitOfWork.ProductRepository.CountAsync();
         public async Task<ResponseAPI> UpdateProductAsync(UpdateProductDto dto)
         {
