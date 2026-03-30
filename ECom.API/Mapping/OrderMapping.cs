@@ -13,8 +13,12 @@ namespace ECom.API.Mapping
             CreateMap<Orders,OrderToReturnDto>()
                 .ForMember(d => d.DeliveryMethod,  
                 o => o.MapFrom(s => s.DeliveryMethod.Name))
-                .ReverseMap()
-                ;
+                .ForMember(d => d.Total,
+                    o => o.MapFrom(s => s.GetTotal()))
+                .ForMember(d => d.Status,
+                    o => o.MapFrom(s => s.Status.ToString()))
+                .ReverseMap();
+
             CreateMap<OrderItems,OrderItemsDto>().ReverseMap();
             CreateMap<ShippingAddress,ShippingAddressDto>().ReverseMap();
             CreateMap<Address, ShippingAddressDto>().ReverseMap();

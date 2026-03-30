@@ -106,4 +106,5 @@ namespace ECom.API.Controllers.Admin
                 return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
+    }
 }
