@@ -6,5 +6,8 @@ namespace ECom.Core.Entities
     {
         public string DisplayName { get; set; }
         public Address Address { get; set; }
+        public bool IsBlocked { get; set; } = false;      
+        public string BlockReason { get; set; }            
+        public DateTime? BlockedAt { get; set; }
     }
 }
