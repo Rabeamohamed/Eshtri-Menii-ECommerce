@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers.Admin
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class AdminProductController : AdminBaseController
     {
         private readonly IAdminProductService _productService;

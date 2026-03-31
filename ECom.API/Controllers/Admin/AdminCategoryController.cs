@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers.Admin
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class AdminCategoryController : AdminBaseController
     {
         private readonly IAdminCategoryService _categoryService;
