@@ -2,11 +2,6 @@
 using ECom.Core.Services;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Service
 {
@@ -44,13 +39,12 @@ namespace ECom.Infrastructure.Service
                 }
                 catch (Exception ex)
                 {
-
-                    throw;
+                    throw new Exception($"Failed to send email to {emailDto.To}: {ex.Message}");
                 }
                 finally
                 {
                     //await smtp.DisconnectAsync(true);
-                    smtp.DisconnectAsync(true);
+                    await smtp.DisconnectAsync(true);
                     smtp.Dispose();
                 }
             }

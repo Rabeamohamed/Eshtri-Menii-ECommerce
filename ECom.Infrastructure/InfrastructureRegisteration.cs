@@ -52,7 +52,7 @@ namespace ECom.Infrastructure
             service.AddScoped<IAdminProductService, AdminProductService>();
             service.AddScoped<IAdminOrderService, AdminOrderService>();
             service.AddScoped<IAdminUserService, AdminUserService>();
-
+            service.AddScoped<RoleManager<IdentityRole>>();
 
 
 

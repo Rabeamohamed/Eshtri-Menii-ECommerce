@@ -1,43 +1,167 @@
-﻿using ECom.Core.DTO.Admin.User;
+using ECom.Core.DTO.Admin.User;
+using ECom.Core.DTO.Auth;
+using ECom.Core.Entities;
+using ECom.Core.Services;
 using ECom.Core.Services.Admin;
 using ECom.Core.Sharing;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 namespace ECom.Infrastructure.Service.Admin
 {
     public class AdminUserService : IAdminUserService
     {
-        public Task<ResponseAPI> AssignRoleAsync(AssignRoleDto dto)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailService _emailService;
+        public AdminUserService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
         {
-            throw new NotImplementedException();
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _emailService = emailService;
+        }
+        public async Task<ResponseAPI> AssignRoleAsync(AssignRoleDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+            if (user is null)
+                return new ResponseAPI(404, "User not found");
+
+            // Check role exists
+            if (!await _roleManager.RoleExistsAsync(dto.Role))
+                return new ResponseAPI(404, $"Role '{dto.Role}' not found");
+
+            // Check if already has role
+            if (await _userManager.IsInRoleAsync(user, dto.Role))
+                return new ResponseAPI(400, $"User already has role '{dto.Role}'");
+
+            var result = await _userManager.AddToRoleAsync(user, dto.Role);
+            if (!result.Succeeded)
+                return new ResponseAPI(400, result.Errors.First().Description);
+
+            return new ResponseAPI(200, $"Role '{dto.Role}' assigned successfully");
         }
 
-        public Task<ResponseAPI> BlockUserAsync(BlockUserDto dto)
+        public async Task<ResponseAPI> BlockUserAsync(BlockUserDto dto)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+            if (user is null)
+                return new ResponseAPI(404, "User not found");
+
+            if (user.IsBlocked)
+                return new ResponseAPI(400, "User is already blocked");
+
+            // Block user
+            user.IsBlocked = true;
+            user.BlockReason = dto.Reason;
+            user.BlockedAt = DateTime.UtcNow;
+
+            // Lock user out of the system
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+
+            await _userManager.UpdateAsync(user);
+            // Send block notification email
+            await SendBlockEmail(user.Email, user.UserName, dto.Reason, isBlocked: true);
+            return new ResponseAPI(200, "User blocked successfully");
         }
 
-        public Task<IReadOnlyList<string>> GetAllRolesAsync()
+        public async Task<IReadOnlyList<string>> GetAllRolesAsync()
         {
-            throw new NotImplementedException();
+            var roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            return roles;
         }
 
-        public Task<IReadOnlyList<UserDto>> GetAllUsersAsync()
+        public async Task<IReadOnlyList<UserDto>> GetAllUsersAsync()
         {
-            throw new NotImplementedException();
+            var users = await _userManager.Users.ToListAsync();
+            var result = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                result.Add(new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    DisplayName = user.DisplayName,
+                    IsBlocked = user.IsBlocked,
+                    EmailConfirmed = user.EmailConfirmed,
+                    Roles = roles
+                });
+            }
+
+            return result;
         }
 
-        public Task<UserDto> GetUserByIdAsync(string userId)
+        public async Task<UserDto> GetUserByIdAsync(string userId)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null) return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            return new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                IsBlocked = user.IsBlocked,
+                EmailConfirmed = user.EmailConfirmed,
+                Roles = roles
+            };
         }
 
-        public Task<ResponseAPI> RemoveRoleAsync(AssignRoleDto dto)
+        public async Task<ResponseAPI> RemoveRoleAsync(AssignRoleDto dto)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+            if (user is null)
+                return new ResponseAPI(404, "User not found");
+
+            if (!await _roleManager.RoleExistsAsync(dto.Role))
+                return new ResponseAPI(404, $"Role '{dto.Role}' not found");
+
+            if (!await _userManager.IsInRoleAsync(user, dto.Role))
+                return new ResponseAPI(400, $"User does not have role '{dto.Role}'");
+
+            var result = await _userManager.RemoveFromRoleAsync(user, dto.Role);
+            if (!result.Succeeded)
+                return new ResponseAPI(400, result.Errors.First().Description);
+
+            return new ResponseAPI(200, $"Role '{dto.Role}' removed successfully");
         }
 
-        public Task<ResponseAPI> UnblockUserAsync(string userId)
+        public async Task<ResponseAPI> UnblockUserAsync(string userId)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return new ResponseAPI(404, "User not found");
+
+            if (!user.IsBlocked)
+                return new ResponseAPI(400, "User is not blocked");
+
+            user.IsBlocked = false;
+            user.BlockReason = null;
+            user.BlockedAt = null;
+
+            // Unlock user
+            await _userManager.SetLockoutEndDateAsync(user, null);
+
+            await _userManager.UpdateAsync(user);
+            
+            // Send unblock notification email
+            await SendBlockEmail(user.Email, user.UserName, string.Empty, isBlocked: false);
+            return new ResponseAPI(200, "User unblocked successfully");
+        }
+
+        private async Task SendBlockEmail(string email, string userName, string reason, bool isBlocked)
+        {
+            string subject = isBlocked ? "Your account has been blocked" : "Your account has been unblocked";
+            string content = isBlocked
+                ? $"Dear {userName},<br/><br/>Your account has been blocked. Reason: {reason}"
+                : $"Dear {userName},<br/><br/>Your account has been unblocked. You can now login.";
+
+            var emailDto = new EmailDto(email, "admin@eshtry.com", subject, content);
+            await _emailService.SendEmailAsync(emailDto);
         }
     }
 }
