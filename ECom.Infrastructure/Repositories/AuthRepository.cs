@@ -82,6 +82,10 @@ namespace ECom.Infrastructure.Repositories
             if (user is null)
                 return "Email or Password is incorrect";
 
+            // Check if user is blocked
+            if (user.IsBlocked)
+                return $"Your account has been blocked. Reason: {user.BlockReason ?? "Violation of terms"}";
+
             if (!user.EmailConfirmed)
             {
                 string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
