@@ -6,6 +6,8 @@ using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;
 using ECom.Infrastructure.Service.Admin;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -123,7 +125,29 @@ namespace ECom.Infrastructure
                  };
              });
 
+
+            // Hangfire Configuration
+            service.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(
+                    configuration.GetConnectionString("HangfireConnection"),
+                    new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    }));
+
+            // Hangfire Server
+            service.AddHangfireServer();
+
             return service;
         }
+
+
     }
 }

@@ -1,6 +1,7 @@
+using AutoMapper;
 using ECom.API.Middleware;
 using ECom.Infrastructure;
-using AutoMapper;
+using Hangfire;
 internal class Program
 {
     private static void Main(string[] args)
@@ -62,6 +63,13 @@ internal class Program
             await next();
         });
         app.MapControllers();
+        
+        // Add after app.UseAuthorization()
+        app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
+        {
+            // Only admin can access dashboard
+            Authorization = new[] { new HangfireAuthorizationFilter() }
+        });
 
         app.Run();
     }
