@@ -1,9 +1,9 @@
 using AutoMapper;
 using ECom.Application.DTO.Category;
 using ECom.Core.Entities.Product;
-using ECom.Application.Interfaces;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
+using ECom.Application.Interfaces.Repositories;
 
 namespace ECom.API.Controllers
 {

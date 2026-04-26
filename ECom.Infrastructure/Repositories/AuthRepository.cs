@@ -1,10 +1,11 @@
 using ECom.Application.DTO.Auth;
 using ECom.Core.Entities;
-using ECom.Application.Interfaces;
-using ECom.Application.Services;
 using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace ECom.Infrastructure.Repositories
 {
@@ -15,17 +16,20 @@ namespace ECom.Infrastructure.Repositories
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IGenerateToken _generateToken;
         private readonly AppDbContext _context;
-        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken, AppDbContext context)
+        private readonly IConfiguration _configuration;
+
+        public AuthRepository(UserManager<AppUser> userManager, IEmailService emailService, SignInManager<AppUser> signInManager, IGenerateToken generateToken, AppDbContext context, IConfiguration configuration)
         {
             _userManager = userManager;
             _emailService = emailService;
             _signInManager = signInManager;
             _generateToken = generateToken;
             _context = context;
+            _configuration = configuration;
         }
+
         public async Task<string> RegisterAsync(RegisterDto registerDto)
         {
-
             if (registerDto == null)
             {
                 return null;
@@ -54,20 +58,20 @@ namespace ECom.Infrastructure.Repositories
 
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            // Send Actice or Confirmation Email
+            // Send Active or Confirmation Email
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await SendEmail(user.Email, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
+            await SendEmail(user.Email!, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
 
             return "User Registered Successfully";
-
         }
 
         public async Task SendEmail(string email, string code, string component, string subject, string message)
         {
+            var baseUrl = _configuration["Token:Issuer"] ?? "https://localhost:44358";
             var result = new EmailDto(email,
                 "rabea2mohamed@gmail.com",
                 subject,
-                EmailStringBody.send(email, code, component, message));
+                EmailStringBody.send(email, code, component, message, baseUrl));
             await _emailService.SendEmailAsync(result);
         }
 
@@ -88,7 +92,7 @@ namespace ECom.Infrastructure.Repositories
             if (!user.EmailConfirmed)
             {
                 string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                await SendEmail(user.Email, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
+                await SendEmail(user.Email!, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
                 return "Please Active your Email, We have sent you an email to active your account";
             }
 
@@ -110,7 +114,7 @@ namespace ECom.Infrastructure.Repositories
                 return false;
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            await SendEmail(user.Email, token, "Reset-Password", "Reset Password", "Please Click on button to Reset your Password");
+            await SendEmail(user.Email!, token, "Reset-Password", "Reset Password", "Please Click on button to Reset your Password");
             return true;
         }
 
@@ -149,8 +153,10 @@ namespace ECom.Infrastructure.Repositories
             return result.Errors.FirstOrDefault()?.Description ?? "Failed to activate user";
         }
 
-        public async Task<bool> UpdateAddress(string email,Address address)
+        public async Task<bool> UpdateAddress(string? email, Address address)
         {
+            if (string.IsNullOrEmpty(email)) return false;
+
             var findUser = await _userManager.FindByEmailAsync(email);
             if (findUser is null)
             {
@@ -160,15 +166,18 @@ namespace ECom.Infrastructure.Repositories
             var MyAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.AppUserId == findUser.Id);
             if (MyAddress is null)
             {
+                address.AppUserId = findUser.Id;
                 await _context.Addresses.AddAsync(address);
             }
             else
             {
                 address.Id = MyAddress.Id;
+                address.AppUserId = findUser.Id;
+                _context.Entry(MyAddress).State = EntityState.Detached;
                 _context.Addresses.Update(address);
             }
             await _context.SaveChangesAsync();
             return true;
         }
     }
-} 
+}

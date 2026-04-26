@@ -1,10 +1,10 @@
 using AutoMapper;
 using ECom.Application.DTO.Order;
 using ECom.Core.Entities.Order;
-using ECom.Application.Services.Admin;
 using ECom.Application.Sharing;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using ECom.Application.Interfaces.Services.Admin;
 namespace ECom.Infrastructure.Service.Admin
 {
     public class AdminOrderService : IAdminOrderService

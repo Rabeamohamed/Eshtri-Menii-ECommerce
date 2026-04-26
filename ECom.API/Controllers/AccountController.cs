@@ -2,11 +2,11 @@ using AutoMapper;
 using ECom.Application.DTO.Auth;
 using ECom.Application.DTO.Order;
 using ECom.Core.Entities;
-using ECom.Application.Interfaces;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ECom.Application.Interfaces.Repositories;
 
 namespace ECom.API.Controllers
 {

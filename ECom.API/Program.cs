@@ -1,5 +1,5 @@
-using AutoMapper;
 using ECom.API.Middleware;
+using ECom.Application.Interfaces.Services;
 using ECom.Infrastructure;
 using Hangfire;
 internal class Program
@@ -7,8 +7,6 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-
 
         // CORS Policy Configuration 
         builder.Services.AddCors(op =>
@@ -70,6 +68,30 @@ internal class Program
             // Only admin can access dashboard
             Authorization = new[] { new HangfireAuthorizationFilter() }
         });
+
+        // Create a scope to safely resolve Hangfire services at startup
+        using (var scope = app.Services.CreateScope())
+        {
+            var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+            // Daily at midnight
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //   "daily-sales-report",
+            //   job => job.SendDailySalesReportAsync(),
+            //   "0 0 * * *");
+
+            // Daily at 1am
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //    "cleanup-cancelled-orders",
+            //    job => job.CleanupCancelledOrdersAsync(),
+            //    "0 1 * * *");
+
+            // Daily at 8am
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //   "low-stock-alerts",
+            //   job => job.SendLowStockAlertsAsync(),
+            //   "0 8 * * *");
+        }
 
         app.Run();
     }

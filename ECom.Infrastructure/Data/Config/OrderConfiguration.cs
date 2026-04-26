@@ -13,7 +13,10 @@ namespace ECom.Infrastructure.Data.Config
                 n => { n.WithOwner(); });
 
             //Many to Many With OrderItems
-            builder.HasMany(x => x.OrderItems).WithOne().OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Convert the Enum to String
             builder.Property(s => s.Status).HasConversion(x => x.ToString(),

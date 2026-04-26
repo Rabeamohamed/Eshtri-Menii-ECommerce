@@ -1,4 +1,4 @@
-using ECom.Core.Interfaces;
+using ECom.Application.Interfaces.Repositories;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

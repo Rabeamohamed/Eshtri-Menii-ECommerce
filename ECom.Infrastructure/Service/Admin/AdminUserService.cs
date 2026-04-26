@@ -1,9 +1,10 @@
 using ECom.Application.DTO.Admin.User;
 using ECom.Application.DTO.Auth;
-using ECom.Core.Entities;
-using ECom.Application.Services;
-using ECom.Application.Services.Admin;
+using ECom.Application.Interfaces.Services;
+using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
+using ECom.Core.Entities;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ECom.Infrastructure.Service.Admin
@@ -60,7 +61,9 @@ namespace ECom.Infrastructure.Service.Admin
 
             await _userManager.UpdateAsync(user);
             // Send block notification email
-            await SendBlockEmail(user.Email, user.UserName, dto.Reason, isBlocked: true);
+            //  Fire and forget — don't block HTTP request waiting for email
+            BackgroundJob.Enqueue<IBackgroundJobService>(
+                job => job.SendBlockNotificationAsync(user.Id, true, dto.Reason));
             return new ResponseAPI(200, "User blocked successfully");
         }
 
@@ -147,9 +150,11 @@ namespace ECom.Infrastructure.Service.Admin
             await _userManager.SetLockoutEndDateAsync(user, null);
 
             await _userManager.UpdateAsync(user);
-            
+
             // Send unblock notification email
-            await SendBlockEmail(user.Email, user.UserName, string.Empty, isBlocked: false);
+            //  Fire and forget
+            BackgroundJob.Enqueue<IBackgroundJobService>(
+                job => job.SendBlockNotificationAsync(user.Id, false, null));
             return new ResponseAPI(200, "User unblocked successfully");
         }
 

@@ -60,8 +60,7 @@ namespace ECom.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId")
-                        .IsUnique();
+                    b.HasIndex("AppUserId");
 
                     b.ToTable("Addresses");
                 });
@@ -75,7 +74,6 @@ namespace ECom.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("BlockReason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("BlockedAt")
@@ -86,7 +84,6 @@ namespace ECom.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -121,6 +118,12 @@ namespace ECom.Infrastructure.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -206,9 +209,6 @@ namespace ECom.Infrastructure.Data.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OrdersId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -225,8 +225,6 @@ namespace ECom.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("OrdersId");
 
                     b.ToTable("OrderItems");
                 });
@@ -621,8 +619,8 @@ namespace ECom.Infrastructure.Data.Migrations
             modelBuilder.Entity("ECom.Core.Entities.Address", b =>
                 {
                     b.HasOne("ECom.Core.Entities.AppUser", "AppUser")
-                        .WithOne("Address")
-                        .HasForeignKey("ECom.Core.Entities.Address", "AppUserId")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -632,15 +630,9 @@ namespace ECom.Infrastructure.Data.Migrations
             modelBuilder.Entity("ECom.Core.Entities.Order.OrderItems", b =>
                 {
                     b.HasOne("ECom.Core.Entities.Order.Orders", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ECom.Core.Entities.Order.Orders", null)
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrdersId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -806,12 +798,6 @@ namespace ECom.Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ECom.Core.Entities.AppUser", b =>
-                {
-                    b.Navigation("Address")
                         .IsRequired();
                 });
 

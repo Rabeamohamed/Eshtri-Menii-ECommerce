@@ -1,11 +1,11 @@
 using ECom.Core.Entities;
-using ECom.Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ECom.Application.Interfaces.Services;
 
 namespace ECom.Infrastructure.Service
 {
@@ -26,8 +26,8 @@ namespace ECom.Infrastructure.Service
 
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name,user.UserName),
-                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.Name, user.UserName!),
+                new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
@@ -36,17 +36,17 @@ namespace ECom.Infrastructure.Service
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
             var Security = _configuration["Token:Secret"];
-            var key = Encoding.ASCII.GetBytes(Security);
+            var key = Encoding.UTF8.GetBytes(Security!);
 
             SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor() 
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.UtcNow.AddDays(1),
                 Issuer = _configuration["Token:Issuer"],
                 SigningCredentials = credentials,
-                NotBefore = DateTime.Now
+                NotBefore = DateTime.UtcNow
             };
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             var token = handler.CreateToken(tokenDescriptor);

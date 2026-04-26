@@ -1,22 +1,25 @@
-﻿
+
 
 namespace ECom.Infrastructure.Repositories
 {
-    public class EmailStringBody  // This class is used to generate the body of the email
-                                  // that will be sent to the user when they register or reset their password.
+    public class EmailStringBody
     {
-        public static string send(string email, string token, string component, string message)
+        public static string send(string email, string token, string component, string message, string baseUrl)
         {
             string encodedToken = Uri.EscapeDataString(token);
             
+            // Remove trailing slash if exists
+            baseUrl = baseUrl.TrimEnd('/');
+
             // Generate different links based on component type
+            // Note: Registration activation link goes to API, Reset Password usually goes to Frontend
             string actionLink = component == "Reset-Password" 
-                ? $"https://localhost:4200/reset-password?email={email}&token={encodedToken}"
-                : $"https://localhost:7076/api/Account/activate-email?email={email}&code={encodedToken}";
+                ? $"http://localhost:4200/reset-password?email={email}&token={encodedToken}"
+                : $"{baseUrl}/api/Account/activate-email?email={email}&code={encodedToken}";
             
             string title = component == "Reset-Password" 
                 ? "Password Reset Request" 
-                : $"Welcome to ECom, {email}!";
+                : $"Welcome to ECom!";
             
             return $@"
             <html> 

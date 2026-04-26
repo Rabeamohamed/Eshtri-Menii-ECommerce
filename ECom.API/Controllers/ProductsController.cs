@@ -1,6 +1,6 @@
 using AutoMapper;
 using ECom.Application.DTO.Product;
-using ECom.Application.Interfaces;
+using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 

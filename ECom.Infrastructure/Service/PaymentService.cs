@@ -1,72 +1,77 @@
 using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
-using ECom.Core.Interfaces;
-using ECom.Application.Interfaces;
-using ECom.Application.Services;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
+using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services;
 
 namespace ECom.Infrastructure.Service
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IUnitOfWork _work;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-        private readonly AppDbContext _context;
 
-        public PaymentService(IUnitOfWork work, IConfiguration configuration, AppDbContext context)
+        public PaymentService(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
-            _work = work;
+            _unitOfWork = unitOfWork;
             _configuration = configuration;
-            _context = context;
             StripeConfiguration.ApiKey = _configuration["StripSettings:SecretKey"];
         }
 
 
         public async Task<CustomerBasket> CreateOrUpdatePaymentAsync(string basketId, int? deliveryMethodId)
         {
-           var basket = await _work.CustomerBasketRepository.GetBasketAsync(basketId);
+           var basket = await _unitOfWork.CustomerBasketRepository.GetBasketAsync(basketId);
+           if (basket == null) return null;
 
            decimal shippingPrice = 0m;
            if(deliveryMethodId.HasValue)
            {
-               var delivery = await _context.DeliveryMethods.AsNoTracking()
-                   .FirstOrDefaultAsync(x => x.Id == deliveryMethodId.Value);
-               shippingPrice = delivery.Price;
+               var delivery = await _unitOfWork.DeliveryMethodRepository.GetByIdAsync(deliveryMethodId.Value);
+               if (delivery != null)
+               {
+                   shippingPrice = delivery.Price;
+               }
            }
 
            foreach (var item in basket.BasketItems)
            {
-               var product = await _work.ProductRepository.GetByIdAsync(item.Id);
-               item.Price= product.NewPrice;
+               var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.Id);
+               if (product != null)
+               {
+                   item.Price = product.NewPrice;
+               }
            }
-           PaymentIntentService paymentIntentService = new PaymentIntentService();
-           PaymentIntent _intent;
+
+           var paymentIntentService = new PaymentIntentService();
+           PaymentIntent intent;
 
            if(string.IsNullOrEmpty(basket.PaymentIntentId))
            {
                var options = new PaymentIntentCreateOptions
                {
-                   Amount = (long)basket.BasketItems.Sum(x => x.Quantity * (x.Price * 100) )+ (long)(shippingPrice * 100),
+                   Amount = (long)(basket.BasketItems.Sum(x => x.Quantity * x.Price) * 100 + shippingPrice * 100),
                    Currency = "USD",
                    PaymentMethodTypes = new List<string> { "card" }
                };
-               _intent = await paymentIntentService.CreateAsync(options);
-               basket.PaymentIntentId= _intent.Id;
-               basket.ClientSecret= _intent.ClientSecret;
+               intent = await paymentIntentService.CreateAsync(options);
+               basket.PaymentIntentId = intent.Id;
+               basket.ClientSecret = intent.ClientSecret;
            }
            else
            {
                var options = new PaymentIntentUpdateOptions
                {
-                   Amount = (long)basket.BasketItems.Sum(x => x.Quantity * (x.Price * 100)) + (long)(shippingPrice * 100),
+                   Amount = (long)(basket.BasketItems.Sum(x => x.Quantity * x.Price) * 100 + shippingPrice * 100),
                };
                await paymentIntentService.UpdateAsync(basket.PaymentIntentId, options);
             }
-              await _work.CustomerBasketRepository.UpdateBasketAsync(basket);
-                return basket;
+
+            await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            return basket;
         }
 
         public async Task<bool> RefundPaymentAsync(string paymentIntentId)
@@ -85,14 +90,14 @@ namespace ECom.Infrastructure.Service
 
         public async Task UpdateOrderPaymentStatusAsync(string paymentIntentId, PaymentStatus status)
         {
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+            var order = await _unitOfWork.OrderRepository
+                .GetOrderByPaymentIntentIdAsync(paymentIntentId);
 
             if (order is null) return;
 
             order.Status = status;
-            _context.Orders.Update(order);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.OrderRepository.UpdateOrderAsync(order);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

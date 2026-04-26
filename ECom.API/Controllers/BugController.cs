@@ -1,5 +1,5 @@
 using AutoMapper;
-using ECom.Application.Interfaces;
+using ECom.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers

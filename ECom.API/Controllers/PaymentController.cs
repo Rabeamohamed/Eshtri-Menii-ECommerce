@@ -1,9 +1,9 @@
 using ECom.Core.Entities.Order;
-using ECom.Application.Services;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using ECom.Application.Interfaces.Services;
 
 namespace ECom.API.Controllers
 {

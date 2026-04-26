@@ -2,9 +2,9 @@
 using AutoMapper;
 using ECom.Application.DTO.Review;
 using ECom.Core.Entities.Product;
-using ECom.Application.Interfaces;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using ECom.Application.Interfaces.Repositories;
 
 namespace ECom.Infrastructure.Repositories
 {

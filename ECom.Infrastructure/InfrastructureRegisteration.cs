@@ -1,8 +1,4 @@
 using ECom.Core.Entities;
-using ECom.Core.Interfaces;
-using ECom.Application.Interfaces;
-using ECom.Application.Services;
-using ECom.Application.Services.Admin;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;
@@ -18,6 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using StackExchange.Redis;
 using System.Text;
+using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services;
+using ECom.Application.Interfaces.Services.Admin;
 
 namespace ECom.Infrastructure
 {
@@ -79,6 +78,9 @@ namespace ECom.Infrastructure
 
             // Apply Identity Configuration
             service.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+
+            // Registering BackgroundJobService Services
+            service.AddScoped<IBackgroundJobService, BackgroundJobService>();
 
             // Apply Authentication Configuration for JWT and Cookies Authentication 
 

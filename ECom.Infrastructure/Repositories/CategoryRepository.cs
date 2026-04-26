@@ -1,5 +1,5 @@
+using ECom.Application.Interfaces.Repositories;
 using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
 using ECom.Infrastructure.Data;
 
 namespace ECom.Infrastructure.Repositories

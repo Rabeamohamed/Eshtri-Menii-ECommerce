@@ -1,5 +1,5 @@
 using ECom.Application.DTO.Wishlist;
-using ECom.Application.Services;
+using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -10,8 +10,8 @@ namespace ECom.API.Controllers
     [ApiController]
     public class WishlistController : ControllerBase
     {
-        private readonly IWishlistService? _wishlistService;
-        public WishlistController(IWishlistService? wishlistService)
+        private readonly IWishlistService _wishlistService;
+        public WishlistController(IWishlistService wishlistService)
         {
             _wishlistService = wishlistService;
         }

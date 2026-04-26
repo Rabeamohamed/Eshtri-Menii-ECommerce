@@ -1,10 +1,9 @@
 using AutoMapper;
 using ECom.Application.DTO.Category;
 using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
-using ECom.Application.Interfaces;
-using ECom.Application.Services.Admin;
 using ECom.Application.Sharing;
+using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services.Admin;
 namespace ECom.Infrastructure.Service.Admin
 {
     public class AdminCategoryService : IAdminCategoryService

@@ -2,10 +2,9 @@ using AutoMapper;
 using ECom.Application.DTO.Wishlist;
 using ECom.Core.Entities;
 using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
-using ECom.Application.Interfaces;
-using ECom.Application.Services;
 using ECom.Application.Sharing;
+using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services;
 
 namespace ECom.Infrastructure.Service
 {

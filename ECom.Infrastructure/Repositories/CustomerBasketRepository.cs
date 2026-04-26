@@ -1,5 +1,5 @@
+using ECom.Application.Interfaces.Repositories;
 using ECom.Core.Entities;
-using ECom.Core.Interfaces;
 using StackExchange.Redis;
 using System.Text.Json;
 
