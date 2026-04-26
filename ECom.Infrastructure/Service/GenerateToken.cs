@@ -1,5 +1,5 @@
-﻿using ECom.Core.Entities;
-using ECom.Core.Services;
+using ECom.Core.Entities;
+using ECom.Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

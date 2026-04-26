@@ -1,4 +1,4 @@
-﻿using ECom.Core.Services;
+using ECom.Application.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using System;

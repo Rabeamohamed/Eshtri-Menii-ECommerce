@@ -1,12 +1,7 @@
-﻿using ECom.Core.Entities;
+using ECom.Core.Entities;
 using ECom.Core.Interfaces;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Repositories
 {

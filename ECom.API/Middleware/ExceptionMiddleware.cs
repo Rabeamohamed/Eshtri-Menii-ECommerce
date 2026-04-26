@@ -1,5 +1,4 @@
-﻿using ECom.API.Helper;
-using Microsoft.AspNetCore.Http;
+using ECom.API.Helper;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 using System.Text.Json;

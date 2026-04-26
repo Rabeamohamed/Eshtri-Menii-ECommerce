@@ -1,6 +1,6 @@
-﻿using ECom.Core.DTO.Wishlist;
-using ECom.Core.Services;
-using ECom.Core.Sharing;
+using ECom.Application.DTO.Wishlist;
+using ECom.Application.Services;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 

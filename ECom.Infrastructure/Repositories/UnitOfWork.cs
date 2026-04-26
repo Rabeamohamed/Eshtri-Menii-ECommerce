@@ -1,16 +1,11 @@
-﻿using AutoMapper;
-using ECom.Core.DTO;
+using AutoMapper;
 using ECom.Core.Entities;
 using ECom.Core.Interfaces;
-using ECom.Core.Services;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
 using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Repositories
 {
@@ -23,9 +18,7 @@ namespace ECom.Infrastructure.Repositories
         private readonly UserManager<AppUser> _userManager; // Inject UserManager for Identity
         private readonly IEmailService _emailService;
         private readonly SignInManager<AppUser> _signInManager; // Inject SignInManager for Identity
-        private readonly IGenerateToken _generateToken; // Inject IGenerateToken for token generation    
-
-
+        private readonly IGenerateToken _generateToken; // Inject IGenerateToken for token generation   
 
         public ICategoryRepository CategoryRepository { get; }
 

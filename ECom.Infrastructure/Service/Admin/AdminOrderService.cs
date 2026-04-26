@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using ECom.Core.DTO.Order;
+using AutoMapper;
+using ECom.Application.DTO.Order;
 using ECom.Core.Entities.Order;
-using ECom.Core.Services.Admin;
-using ECom.Core.Sharing;
+using ECom.Application.Services.Admin;
+using ECom.Application.Sharing;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 namespace ECom.Infrastructure.Service.Admin

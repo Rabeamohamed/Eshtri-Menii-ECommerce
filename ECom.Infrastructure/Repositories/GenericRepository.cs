@@ -1,8 +1,7 @@
-﻿using ECom.Core.Interfaces;
+using ECom.Core.Interfaces;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-
 
 namespace ECom.Infrastructure.Repositories
 {
@@ -28,7 +27,6 @@ namespace ECom.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
             => await _context.Set<T>().AsNoTracking().ToListAsync();
-
         public async Task<IReadOnlyList<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
         {
             var query = _context.Set<T>().AsQueryable();
@@ -44,7 +42,6 @@ namespace ECom.Infrastructure.Repositories
             var entity = await _context.Set<T>().FindAsync(id);
             return entity;
         }
-
         public async Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes)
         {
             var query = _context.Set<T>().AsQueryable();
@@ -55,7 +52,6 @@ namespace ECom.Infrastructure.Repositories
             var entity = await query.FirstOrDefaultAsync(x => EF.Property<int>( x, "Id" ) == id);
             return entity;
         }
-
         public async Task UpdateAsync(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;

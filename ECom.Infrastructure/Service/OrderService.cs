@@ -1,10 +1,11 @@
-﻿using AutoMapper;
-using ECom.Core.DTO.Order;
+using AutoMapper;
+using ECom.Application.DTO.Order;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using ECom.Core.Interfaces;
-using ECom.Core.Services;
-using ECom.Core.Sharing;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
+using ECom.Application.Sharing;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;

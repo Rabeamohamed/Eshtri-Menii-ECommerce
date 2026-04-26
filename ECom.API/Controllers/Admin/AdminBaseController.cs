@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using ECom.Core.Interfaces;
+using AutoMapper;
+using ECom.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

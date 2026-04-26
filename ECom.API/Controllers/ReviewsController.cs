@@ -1,9 +1,7 @@
-﻿
-using AutoMapper;
-using ECom.Core.DTO.Review;
-using ECom.Core.Interfaces;
-using ECom.Core.Services;
-using ECom.Core.Sharing;
+
+using ECom.Application.DTO.Review;
+using ECom.Application.Services;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

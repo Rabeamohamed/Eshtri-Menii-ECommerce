@@ -1,5 +1,5 @@
-﻿using ECom.Core.DTO.Auth;
-using ECom.Core.Services;
+using ECom.Application.DTO.Auth;
+using ECom.Application.Services;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 

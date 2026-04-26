@@ -1,8 +1,8 @@
-﻿
+
 using AutoMapper;
-using ECom.Core.DTO.Review;
+using ECom.Application.DTO.Review;
 using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
+using ECom.Application.Interfaces;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ECom.Core.Entities;
-using ECom.Core.Interfaces;
-using ECom.Core.Sharing;
+using ECom.Application.Interfaces;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers

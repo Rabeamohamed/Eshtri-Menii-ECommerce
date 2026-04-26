@@ -1,9 +1,9 @@
-using ECom.Core.DTO.Admin.User;
-using ECom.Core.DTO.Auth;
+using ECom.Application.DTO.Admin.User;
+using ECom.Application.DTO.Auth;
 using ECom.Core.Entities;
-using ECom.Core.Services;
-using ECom.Core.Services.Admin;
-using ECom.Core.Sharing;
+using ECom.Application.Services;
+using ECom.Application.Services.Admin;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ECom.Infrastructure.Service.Admin

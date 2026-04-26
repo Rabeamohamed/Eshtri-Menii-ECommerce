@@ -1,4 +1,4 @@
-﻿using ECom.Core.Sharing;
+using ECom.Application.Sharing;
 
 namespace ECom.API.Helper
 {

@@ -1,7 +1,8 @@
-﻿using ECom.Core.Entities;
+using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
 using ECom.Core.Interfaces;
-using ECom.Core.Services;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -1,7 +1,7 @@
-﻿using ECom.Core.DTO.Auth;
+using ECom.Application.DTO.Auth;
 using ECom.Core.Entities;
-using ECom.Core.Interfaces;
-using ECom.Core.Services;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
 using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,6 @@ namespace ECom.Infrastructure.Repositories
             _generateToken = generateToken;
             _context = context;
         }
-
         public async Task<string> RegisterAsync(RegisterDto registerDto)
         {
 

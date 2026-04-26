@@ -1,6 +1,6 @@
-﻿using ECom.Core.DTO.Admin;
+using ECom.Application.DTO.Admin;
 using ECom.Core.Entities.Order;
-using ECom.Core.Services.Admin;
+using ECom.Application.Services.Admin;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 namespace ECom.Infrastructure.Service.Admin

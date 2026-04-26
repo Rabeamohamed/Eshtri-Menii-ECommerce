@@ -1,7 +1,8 @@
-﻿using ECom.Core.Entities;
+using ECom.Core.Entities;
 using ECom.Core.Interfaces;
-using ECom.Core.Services;
-using ECom.Core.Services.Admin;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
+using ECom.Application.Services.Admin;
 using ECom.Infrastructure.Data;
 using ECom.Infrastructure.Repositories;
 using ECom.Infrastructure.Service;

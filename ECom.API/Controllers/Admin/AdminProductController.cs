@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using ECom.API.Helper;
-using ECom.Core.DTO.Product;
-using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
-using ECom.Core.Services.Admin;
-using ECom.Core.Sharing;
+using AutoMapper;
+using ECom.Application.DTO.Product;
+using ECom.Application.Interfaces;
+using ECom.Application.Services.Admin;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers.Admin

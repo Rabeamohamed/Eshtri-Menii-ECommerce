@@ -1,9 +1,7 @@
-﻿using ECom.Core.Entities;
 using ECom.Core.Entities.Order;
-using ECom.Core.Services;
-using ECom.Core.Sharing;
+using ECom.Application.Services;
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 

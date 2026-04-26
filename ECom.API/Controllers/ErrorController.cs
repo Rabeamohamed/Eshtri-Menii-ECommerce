@@ -1,5 +1,5 @@
-﻿
-using ECom.Core.Sharing;
+
+using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers

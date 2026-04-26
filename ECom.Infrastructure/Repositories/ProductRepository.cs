@@ -1,18 +1,11 @@
-﻿using AutoMapper;
-using ECom.Core.DTO.Product;
+using AutoMapper;
+using ECom.Application.DTO.Product;
 using ECom.Core.Entities.Product;
-using ECom.Core.Interfaces;
-using ECom.Core.Services;
-using ECom.Core.Sharing;
+using ECom.Application.Interfaces;
+using ECom.Application.Services;
+using ECom.Application.Sharing;
 using ECom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECom.Infrastructure.Repositories
 {
