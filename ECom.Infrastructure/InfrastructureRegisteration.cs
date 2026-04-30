@@ -33,29 +33,19 @@ namespace ECom.Infrastructure
             // Registering Email Service
             service.AddScoped<IEmailService, EmailService>();
 
-            //Register Order Service 
-            service.AddScoped<IOrderService, OrderService>();
 
             // Registering Token
             service.AddScoped<IGenerateToken, GenerateToken>();
 
+            // Registering Auth Service
+            service.AddScoped<IAuthService, AuthService>();
+
             //Registering Payment Service
             service.AddScoped<IPaymentService, PaymentService>();
 
-            // Registering Review Service
-            service.AddScoped<IReviewService, ReviewService>();
 
-            // Registering Wishlist Service
-            service.AddScoped<IWishlistService, WishlistService>();
-
-            // Registering Admin Services
-            service.AddScoped<IAdminAnalyticsService, AdminAnalyticsService>();
-            service.AddScoped<IAdminCategoryService, AdminCategoryService>();
-            service.AddScoped<IAdminProductService, AdminProductService>();
-            service.AddScoped<IAdminOrderService, AdminOrderService>();
             service.AddScoped<IAdminUserService, AdminUserService>();
             service.AddScoped<RoleManager<IdentityRole>>();
-
 
 
             // Apply Redis Connection for Caching

@@ -1,5 +1,6 @@
 using ECom.API.Middleware;
 using ECom.Application.Interfaces.Services;
+using ECom.Application;
 using ECom.Infrastructure;
 using Hangfire;
 internal class Program
@@ -30,6 +31,7 @@ internal class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.InfrastructureConfiguration(builder.Configuration);
+        builder.Services.AddApplicationServices();
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // AutoMapper Configuration Registration Dependency Injection
 
         var app = builder.Build();

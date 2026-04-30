@@ -45,6 +45,32 @@ namespace ECom.Infrastructure.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<IReadOnlyList<Orders>> GetAllOrdersAsync(PaymentStatus? status = null)
+        {
+            var query = _context.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.DeliveryMethod)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (status.HasValue)
+                query = query.Where(o => o.Status == status.Value);
+
+            return await query
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<Dictionary<string, int>> GetOrdersCountByStatusAsync()
+        {
+            var counts = await _context.Orders
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                .ToListAsync();
+
+            return counts.ToDictionary(x => x.Status, x => x.Count);
+        }
+
         public Task AddOrderAsync(Orders order)
         {
             _context.Orders.Add(order);

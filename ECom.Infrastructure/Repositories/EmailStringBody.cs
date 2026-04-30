@@ -15,7 +15,7 @@ namespace ECom.Infrastructure.Repositories
             // Note: Registration activation link goes to API, Reset Password usually goes to Frontend
             string actionLink = component == "Reset-Password" 
                 ? $"http://localhost:4200/reset-password?email={email}&token={encodedToken}"
-                : $"{baseUrl}/api/Account/activate-email?email={email}&code={encodedToken}";
+                : $"http://localhost:4200/activate-email?email={email}&code={encodedToken}";
             
             string title = component == "Reset-Password" 
                 ? "Password Reset Request" 

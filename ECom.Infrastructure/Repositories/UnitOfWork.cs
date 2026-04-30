@@ -15,9 +15,6 @@ namespace ECom.Infrastructure.Repositories
         private readonly IMapper _mapper; // Inject IMapper to send to ProductRepository
         private readonly IImageManagementService _imageManagementService; // Inject Image Management Service to send to ProductRepository
         private readonly IConnectionMultiplexer _redis; // Inject IConnectionMultiplexer for Redis
-        private readonly UserManager<AppUser> _userManager; // Inject UserManager for Identity
-        private readonly IEmailService _emailService;
-        private readonly SignInManager<AppUser> _signInManager; // Inject SignInManager for Identity
         private readonly IGenerateToken _generateToken; // Inject IGenerateToken for token generation   
         private readonly IConfiguration _configuration;
 
@@ -29,7 +26,6 @@ namespace ECom.Infrastructure.Repositories
 
         public ICustomerBasketRepository CustomerBasketRepository { get; }
 
-        public IAuth AuthRepository { get; }
 
         public IReviewRepository ReviewRepository { get; }
 
@@ -38,29 +34,26 @@ namespace ECom.Infrastructure.Repositories
         public IOrderRepository OrderRepository { get; }
 
         public IDeliveryMethodRepository DeliveryMethodRepository { get; }
+        public IAnalyticsRepository AnalyticsRepository { get; }
 
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService,
-            IConnectionMultiplexer redis, UserManager<AppUser> userManager, IEmailService emailService,
-            SignInManager<AppUser> signInManager, IGenerateToken generateToken, IConfiguration configuration)
+            IConnectionMultiplexer redis, IGenerateToken generateToken, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
             _redis = redis;
-            _userManager = userManager;
             _imageManagementService = imageManagementService;
-            _emailService = emailService;
-            _signInManager = signInManager;
             _generateToken = generateToken;
             _configuration = configuration;
             CategoryRepository = new CategoryRepository(context);
             ProductRepository = new ProductRepository(context, _mapper, _imageManagementService);
             PhotoRepository = new PhotoRepository(context); // Initialize PhotoRepository
             CustomerBasketRepository = new CustomerBasketRepository(redis); // Initialize CustomerBasketRepository in UnitOfWork constructor
-            AuthRepository = new AuthRepository(userManager, _emailService, _signInManager, generateToken, _context, _configuration); // Initialize AuthRepository in UnitOfWork constructor
             ReviewRepository = new ReviewRepository(context, _mapper);
             WishlistRepository = new WishlistRepository(context, _mapper);
             OrderRepository = new OrderRepository(context);
             DeliveryMethodRepository = new DeliveryMethodRepository(context);
+            AnalyticsRepository = new AnalyticsRepository(context);
         }
 
         public async Task<int> SaveChangesAsync()

@@ -58,12 +58,20 @@ namespace ECom.Infrastructure.Service.Admin
             // Lock user out of the system
             await _userManager.SetLockoutEnabledAsync(user, true);
             await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-
             await _userManager.UpdateAsync(user);
+
+
             // Send block notification email
             //  Fire and forget — don't block HTTP request waiting for email
-            BackgroundJob.Enqueue<IBackgroundJobService>(
-                job => job.SendBlockNotificationAsync(user.Id, true, dto.Reason));
+            //BackgroundJob.Enqueue<IBackgroundJobService>(
+            //    job => job.SendBlockNotificationAsync(user.Id, true, dto.Reason));
+
+            // Send email directly
+            await SendBlockNotificationEmail(
+                user.Email,
+                user.UserName,
+                dto.Reason,
+                isBlocked: true);
             return new ResponseAPI(200, "User blocked successfully");
         }
 
@@ -148,24 +156,52 @@ namespace ECom.Infrastructure.Service.Admin
 
             // Unlock user
             await _userManager.SetLockoutEndDateAsync(user, null);
-
+            await _userManager.ResetAccessFailedCountAsync(user);
             await _userManager.UpdateAsync(user);
 
             // Send unblock notification email
             //  Fire and forget
-            BackgroundJob.Enqueue<IBackgroundJobService>(
-                job => job.SendBlockNotificationAsync(user.Id, false, null));
+            //BackgroundJob.Enqueue<IBackgroundJobService>(
+            //    job => job.SendBlockNotificationAsync(user.Id, false, null));
+
+            //  Send email directly
+            await SendBlockNotificationEmail(
+                user.Email,
+                user.UserName,
+                null,
+                isBlocked: false);
+
             return new ResponseAPI(200, "User unblocked successfully");
         }
 
-        private async Task SendBlockEmail(string email, string userName, string reason, bool isBlocked)
+        //  Private helper — send block/unblock email
+        private async Task SendBlockNotificationEmail(
+            string email,
+            string userName,
+            string reason,
+            bool isBlocked)
         {
-            string subject = isBlocked ? "Your account has been blocked" : "Your account has been unblocked";
-            string content = isBlocked
-                ? $"Dear {userName},<br/><br/>Your account has been blocked. Reason: {reason}"
-                : $"Dear {userName},<br/><br/>Your account has been unblocked. You can now login.";
+            var subject = isBlocked
+                ? "⛔ Account Blocked"
+                : "✅ Account Unblocked";
 
-            var emailDto = new EmailDto(email, "admin@eshtry.com", subject, content);
+            var message = isBlocked
+                ? $"Dear {userName},\n\n" +
+                  $"Your account has been blocked.\n" +
+                  $"Reason: {reason ?? "Violation of terms"}\n\n" +
+                  $"Please contact support if you think this is a mistake."
+                : $"Dear {userName},\n\n" +
+                  $"Your account has been unblocked.\n" +
+                  $"You can now login again.\n\n" +
+                  $"Thank you for your patience.";
+
+            var emailDto = new EmailDto(
+                email,
+                "noreply@ecom.com",
+                subject,
+                message
+            );
+
             await _emailService.SendEmailAsync(emailDto);
         }
     }
