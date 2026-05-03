@@ -135,6 +135,17 @@ namespace ECom.API.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("get-current-user")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+            var user = await _authService.GetCurrentUserAsync(email);
+            return Ok(user);
+        }
+
         private void SetTokenCookies(string accessToken, string refreshToken)
         {
             var cookieOptions = new CookieOptions

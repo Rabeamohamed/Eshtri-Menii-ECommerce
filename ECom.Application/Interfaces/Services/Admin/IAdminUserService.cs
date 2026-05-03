@@ -6,10 +6,10 @@ namespace ECom.Application.Interfaces.Services.Admin
     public interface IAdminUserService
     {
         // Get all users
-        Task<IReadOnlyList<UserDto>> GetAllUsersAsync();
+        Task<IReadOnlyList<UserAdminDto>> GetAllUsersAsync();
 
         // Get user by id
-        Task<UserDto> GetUserByIdAsync(string userId);
+        Task<UserAdminDto> GetUserByIdAsync(string userId);
 
         // Block user
         Task<ResponseAPI> BlockUserAsync(BlockUserDto dto);

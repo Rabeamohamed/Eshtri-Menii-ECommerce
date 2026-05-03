@@ -207,6 +207,22 @@ namespace ECom.Infrastructure.Service
             return true;
         }
 
+        public async Task<UserAuthDto> GetCurrentUserAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null) return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return new UserAuthDto
+            {
+                Email = user.Email!,
+                DisplayName = user.DisplayName,
+                UserName = user.UserName!,
+                Roles = roles.ToList()
+            };
+        }
+
         private async Task SendActivationEmail(string email, string code, string component, string subject, string message)
         {
             var baseUrl = _configuration["Token:Issuer"] ?? "https://localhost:44358";

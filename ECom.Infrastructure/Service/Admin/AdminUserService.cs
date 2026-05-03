@@ -81,15 +81,15 @@ namespace ECom.Infrastructure.Service.Admin
             return roles;
         }
 
-        public async Task<IReadOnlyList<UserDto>> GetAllUsersAsync()
+        public async Task<IReadOnlyList<UserAdminDto>> GetAllUsersAsync()
         {
             var users = await _userManager.Users.ToListAsync();
-            var result = new List<UserDto>();
+            var result = new List<UserAdminDto>();
 
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                result.Add(new UserDto
+                result.Add(new UserAdminDto
                 {
                     Id = user.Id,
                     UserName = user.UserName,
@@ -104,13 +104,13 @@ namespace ECom.Infrastructure.Service.Admin
             return result;
         }
 
-        public async Task<UserDto> GetUserByIdAsync(string userId)
+        public async Task<UserAdminDto> GetUserByIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null) return null;
 
             var roles = await _userManager.GetRolesAsync(user);
-            return new UserDto
+            return new UserAdminDto
             {
                 Id = user.Id,
                 UserName = user.UserName,

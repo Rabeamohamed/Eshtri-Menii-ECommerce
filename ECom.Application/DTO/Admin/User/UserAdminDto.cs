@@ -1,7 +1,7 @@
 
 namespace ECom.Application.DTO.Admin.User
 {
-    public record UserDto
+    public record UserAdminDto
     {
         public string Id { get; init; }
         public string UserName { get; init; }
