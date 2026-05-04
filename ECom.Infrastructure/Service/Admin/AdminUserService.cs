@@ -14,11 +14,13 @@ namespace ECom.Infrastructure.Service.Admin
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
-        public AdminUserService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
+        private readonly INotificationService _notificationService;
+        public AdminUserService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, INotificationService notificationService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
+            _notificationService = notificationService;
         }
         public async Task<ResponseAPI> AssignRoleAsync(AssignRoleDto dto)
         {
@@ -72,6 +74,14 @@ namespace ECom.Infrastructure.Service.Admin
                 user.UserName,
                 dto.Reason,
                 isBlocked: true);
+
+            // Send In-App Notification
+            await _notificationService.SendToUserAsync(
+                user.Id,
+                "⛔ Account Blocked",
+                $"Your account has been blocked. Reason: {dto.Reason ?? "Violation of terms"}",
+                ECom.Core.Enums.NotificationType.AccountBlocked);
+
             return new ResponseAPI(200, "User blocked successfully");
         }
 
@@ -170,6 +180,13 @@ namespace ECom.Infrastructure.Service.Admin
                 user.UserName,
                 null,
                 isBlocked: false);
+
+            // Send In-App Notification
+            await _notificationService.SendToUserAsync(
+                user.Id,
+                "✅ Account Unblocked",
+                "Your account has been unblocked. You can now login again.",
+                ECom.Core.Enums.NotificationType.AccountUnblocked);
 
             return new ResponseAPI(200, "User unblocked successfully");
         }

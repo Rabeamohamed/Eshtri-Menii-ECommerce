@@ -72,6 +72,9 @@ namespace ECom.Infrastructure
             // Registering BackgroundJobService Services
             service.AddScoped<IBackgroundJobService, BackgroundJobService>();
 
+            // Registering Notification Service
+            service.AddScoped<INotificationService, NotificationService>();
+
             // Apply Authentication Configuration for JWT and Cookies Authentication 
 
             service.AddAuthentication(options =>

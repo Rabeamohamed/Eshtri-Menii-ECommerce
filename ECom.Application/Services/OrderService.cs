@@ -5,6 +5,9 @@ using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
+using ECom.Core.Entities;
+using Microsoft.AspNetCore.Identity;
+using ECom.Core.Enums;
 
 namespace ECom.Application.Services
 {
@@ -13,15 +16,21 @@ namespace ECom.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
+        private readonly INotificationService _notificationService;
+        private readonly UserManager<AppUser> _userManager;
 
         public OrderService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IPaymentService paymentService)
+            IPaymentService paymentService,
+            INotificationService notificationService,
+            UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _paymentService = paymentService;
+            _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string buyerEmail)
@@ -95,6 +104,30 @@ namespace ECom.Application.Services
 
             await _unitOfWork.CustomerBasketRepository
                 .DeleteBasketAsync(orderDto.BasketId);
+
+            // Send Notifications
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(buyerEmail);
+                if (user != null)
+                {
+                    await _notificationService.SendToUserAsync(
+                        user.Id,
+                        "Order Placed! 🛍️",
+                        $"Your order #{order.Id} has been placed successfully.",
+                        NotificationType.OrderPlaced);
+                }
+
+                // Notify admins
+                await _notificationService.SendToAdminsAsync(
+                    "New Order Received! 📦",
+                    $"New order #{order.Id} placed by {buyerEmail}",
+                    NotificationType.NewOrder);
+            }
+            catch
+            {
+                // Logic shouldn't fail if notification fails
+            }
 
             return order;
         }

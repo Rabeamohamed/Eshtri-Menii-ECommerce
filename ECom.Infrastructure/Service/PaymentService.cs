@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Stripe;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Identity;
+using ECom.Core.Enums;
 
 namespace ECom.Infrastructure.Service
 {
@@ -13,11 +15,15 @@ namespace ECom.Infrastructure.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly INotificationService _notificationService;
+        private readonly UserManager<AppUser> _userManager;
 
-        public PaymentService(IUnitOfWork unitOfWork, IConfiguration configuration)
+        public PaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, INotificationService notificationService, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _notificationService = notificationService;
+            _userManager = userManager;
             StripeConfiguration.ApiKey = _configuration["StripSettings:SecretKey"];
         }
 
@@ -98,6 +104,35 @@ namespace ECom.Infrastructure.Service
             order.Status = status;
             await _unitOfWork.OrderRepository.UpdateOrderAsync(order);
             await _unitOfWork.SaveChangesAsync();
+
+            // Send Notifications
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(order.BuyerEmail);
+                if (user != null)
+                {
+                    var (title, message) = status switch
+                    {
+                        PaymentStatus.PaymentReceived => ("Payment Received! ✅", $"Your payment for order #{order.Id} has been received successfully."),
+                        PaymentStatus.PaymentFailed => ("Payment Failed! ❌", $"Payment for your order #{order.Id} failed. Please check your payment method."),
+                        _ => (string.Empty, string.Empty)
+                    };
+
+                    if (!string.IsNullOrEmpty(title))
+                    {
+                        await _notificationService.SendToUserAsync(
+                            user.Id,
+                            title,
+                            message,
+                            status == PaymentStatus.PaymentReceived ? NotificationType.PaymentReceived : NotificationType.PaymentFailed
+                        );
+                    }
+                }
+            }
+            catch
+            {
+                // Logic shouldn't fail if notification fails
+            }
         }
     }
 }

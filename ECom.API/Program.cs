@@ -1,7 +1,7 @@
 using ECom.API.Middleware;
-using ECom.Application.Interfaces.Services;
 using ECom.Application;
 using ECom.Infrastructure;
+using ECom.Infrastructure.Hubs;
 using Hangfire;
 internal class Program
 {
@@ -22,6 +22,8 @@ internal class Program
         });
         // In-Memory Caching Service Registration for Rate Limiting in Exception Middlewaret
         builder.Services.AddMemoryCache();
+
+        builder.Services.AddSignalR();
 
         // Add services to the container.
 
@@ -63,6 +65,7 @@ internal class Program
             await next();
         });
         app.MapControllers();
+        app.MapHub<NotificationHub>("/hub/notifications");
         
         // Add after app.UseAuthorization()
         app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions

@@ -1,4 +1,4 @@
-﻿namespace ECom.Core.Enums;
+namespace ECom.Core.Enums;
 
 public enum NotificationType
 {
@@ -6,5 +6,7 @@ public enum NotificationType
     PaymentReceived,
     LowStock,
     AccountBlocked,
-    AccountUnblocked
+    AccountUnblocked,
+    PaymentFailed,
+    NewOrder
 }
