@@ -24,6 +24,7 @@ namespace ECom.Infrastructure.Data
         public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public virtual DbSet<Wishlist> Wishlists { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<Coupon> Coupons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
