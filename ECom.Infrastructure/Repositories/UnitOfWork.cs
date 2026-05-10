@@ -35,6 +35,7 @@ namespace ECom.Infrastructure.Repositories
 
         public IDeliveryMethodRepository DeliveryMethodRepository { get; }
         public IAnalyticsRepository AnalyticsRepository { get; }
+        public ICouponRepository CouponRepository { get; }
 
         public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService,
             IConnectionMultiplexer redis, IGenerateToken generateToken, IConfiguration configuration)
@@ -54,6 +55,7 @@ namespace ECom.Infrastructure.Repositories
             OrderRepository = new OrderRepository(context);
             DeliveryMethodRepository = new DeliveryMethodRepository(context);
             AnalyticsRepository = new AnalyticsRepository(context);
+            CouponRepository = new CouponRepository(context);
         }
 
         public async Task<int> SaveChangesAsync()

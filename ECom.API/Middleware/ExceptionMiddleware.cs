@@ -35,6 +35,7 @@ namespace ECom.API.Middleware
                         (int)HttpStatusCode.TooManyRequests, "Too many requests. Please try again later.");
 
                     await context.Response.WriteAsJsonAsync(response);
+                    return;
                 }
                 await _next(context);
             }
@@ -91,9 +92,9 @@ namespace ECom.API.Middleware
 
         public void ApplySecurity(HttpContext context)
         {
-            context.Response.Headers.Add("X-Content-Type-Options", "nosniff"); // Prevent MIME type sniffing apply content type options 
-            context.Response.Headers.Add("X-Frame-Options", "DENY"); // Prevent Clickjacking attacks apply frame options
-            context.Response.Headers.Add("X-XSS-Protection", "1; mode=block"); // Enable XSS protection in browsers apply XSS filtering protections
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff"); // Prevent MIME type sniffing apply content type options 
+            context.Response.Headers.Append("X-Frame-Options", "DENY"); // Prevent Clickjacking attacks apply frame options
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block"); // Enable XSS protection in browsers apply XSS filtering protections
             //context.Response.Headers.Add("Referrer-Policy", "no-referrer");
             //context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'");
         }

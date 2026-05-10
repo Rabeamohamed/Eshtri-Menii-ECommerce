@@ -17,6 +17,7 @@ namespace ECom.Infrastructure.Repositories
         public async Task<Orders> GetOrderByPaymentIntentIdAsync(string paymentIntentId)
         {
             return await _context.Orders
+                .Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
         }
 

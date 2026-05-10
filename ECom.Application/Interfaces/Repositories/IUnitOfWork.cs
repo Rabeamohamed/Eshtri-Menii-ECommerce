@@ -11,6 +11,7 @@ namespace ECom.Application.Interfaces.Repositories
         public IOrderRepository OrderRepository { get; }
         public IDeliveryMethodRepository DeliveryMethodRepository { get; } 
         public IAnalyticsRepository AnalyticsRepository { get; }
+        public ICouponRepository CouponRepository { get; }
         public Task<int> SaveChangesAsync(); // int because return number of affected rows
 
     }

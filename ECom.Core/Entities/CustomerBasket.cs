@@ -19,6 +19,10 @@ namespace ECom.Core.Entities
         public string Id { get; set; } // key
         public string? PaymentIntentId { get; set; }
         public string? ClientSecret { get; set; }
+
+        // Coupon support
+        public string CouponCode { get; set; }        // applied coupon code
+        public decimal DiscountAmount { get; set; }    // calculated discount
         public List<BasketItem> BasketItems { get; set; } = new List<BasketItem>();  // Value
     }
 }

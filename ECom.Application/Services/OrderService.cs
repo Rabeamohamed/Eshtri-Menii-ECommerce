@@ -2,10 +2,12 @@ using AutoMapper;
 using ECom.Application.DTO.Order;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
+using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using ECom.Core.Entities;
+using ECom.Application.DTO.Coupon;
 using Microsoft.AspNetCore.Identity;
 using ECom.Core.Enums;
 
@@ -17,6 +19,7 @@ namespace ECom.Application.Services
         private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
         private readonly INotificationService _notificationService;
+        private readonly ICouponService _couponService;
         private readonly UserManager<AppUser> _userManager;
 
         public OrderService(
@@ -24,12 +27,14 @@ namespace ECom.Application.Services
             IMapper mapper,
             IPaymentService paymentService,
             INotificationService notificationService,
+            ICouponService couponService,
             UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _paymentService = paymentService;
             _notificationService = notificationService;
+            _couponService = couponService;
             _userManager = userManager;
         }
 
@@ -73,7 +78,19 @@ namespace ECom.Application.Services
             if (deliveryMethod is null)
                 throw new Exception("Delivery method not found");
 
+            // Calculate subtotal (calculate once)
             var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
+
+            // Apply coupon discount if exists
+            var discountAmount = 0m;
+            if (!string.IsNullOrEmpty(basket.CouponCode))
+            {
+                discountAmount = basket.DiscountAmount > 0 ? basket.DiscountAmount : 0;
+            }
+
+            // Calculate final total after discount
+            var finalTotal = subTotal - discountAmount;
+
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
 
             var existOrder = await _unitOfWork.OrderRepository
@@ -81,18 +98,31 @@ namespace ECom.Application.Services
 
             if (existOrder is not null)
             {
+                // Restore stock from existing order before deleting it
+                foreach (var item in existOrder.OrderItems)
+                {
+                    var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductItemId);
+                    if (product is not null)
+                    {
+                        product.StockQuantity += item.Quantity;
+                        await _unitOfWork.ProductRepository.UpdateAsync(product);
+                    }
+                }
+
                 await _unitOfWork.OrderRepository.DeleteOrderAsync(existOrder);
                 await _paymentService.CreateOrUpdatePaymentAsync(
                     basket.Id, deliveryMethod.Id);
                 await _unitOfWork.SaveChangesAsync();
             }
 
+            // Create order with final total (after discount)
             var order = new Orders(
-                buyerEmail, subTotal, shippingAddress,
+                buyerEmail, finalTotal, shippingAddress,
                 deliveryMethod, orderItems, basket.PaymentIntentId);
 
             await _unitOfWork.OrderRepository.AddOrderAsync(order);
 
+            // Update product stock
             foreach (var item in basket.BasketItems)
             {
                 var product = products[item.Id];
@@ -102,6 +132,13 @@ namespace ECom.Application.Services
 
             await _unitOfWork.SaveChangesAsync();
 
+            // Apply coupon and increment usage count if coupon was used
+            if (!string.IsNullOrEmpty(basket.CouponCode) && discountAmount > 0)
+            {
+                await _couponService.IncrementCouponUsageAsync(basket.CouponCode);
+            }
+
+            // Delete basket after order is created
             await _unitOfWork.CustomerBasketRepository
                 .DeleteBasketAsync(orderDto.BasketId);
 

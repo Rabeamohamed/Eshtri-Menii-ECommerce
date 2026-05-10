@@ -55,11 +55,15 @@ namespace ECom.Infrastructure.Service
            var paymentIntentService = new PaymentIntentService();
            PaymentIntent intent;
 
+           var subTotal = basket.BasketItems.Sum(x => x.Quantity * x.Price);
+           var discountAmount = basket.DiscountAmount > 0 ? basket.DiscountAmount : 0m;
+           var finalTotal = subTotal - discountAmount + shippingPrice;
+
            if(string.IsNullOrEmpty(basket.PaymentIntentId))
            {
                var options = new PaymentIntentCreateOptions
                {
-                   Amount = (long)(basket.BasketItems.Sum(x => x.Quantity * x.Price) * 100 + shippingPrice * 100),
+                   Amount = (long)(finalTotal * 100),
                    Currency = "USD",
                    PaymentMethodTypes = new List<string> { "card" }
                };
@@ -71,7 +75,7 @@ namespace ECom.Infrastructure.Service
            {
                var options = new PaymentIntentUpdateOptions
                {
-                   Amount = (long)(basket.BasketItems.Sum(x => x.Quantity * x.Price) * 100 + shippingPrice * 100),
+                   Amount = (long)(finalTotal * 100),
                };
                await paymentIntentService.UpdateAsync(basket.PaymentIntentId, options);
             }

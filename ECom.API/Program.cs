@@ -81,22 +81,22 @@ internal class Program
             var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
             // Daily at midnight
-            recurringJobManager.AddOrUpdate<IBackgroundJobService>(
-               "daily-sales-report",
-               job => job.SendDailySalesReportAsync(),
-               "0 0 * * *");
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //   "daily-sales-report",
+            //   job => job.SendDailySalesReportAsync(),
+            //   "0 0 * * *");
 
             // Daily at 1am
-            recurringJobManager.AddOrUpdate<IBackgroundJobService>(
-                "cleanup-cancelled-orders",
-                job => job.CleanupCancelledOrdersAsync(),
-                "0 1 * * *");
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //    "cleanup-cancelled-orders",
+            //    job => job.CleanupCancelledOrdersAsync(),
+            //    "0 1 * * *");
 
             // Daily at 8am
-            recurringJobManager.AddOrUpdate<IBackgroundJobService>(
-               "low-stock-alerts",
-               job => job.SendLowStockAlertsAsync(),
-               "0 8 * * *");
+            //recurringJobManager.AddOrUpdate<IBackgroundJobService>(
+            //   "low-stock-alerts",
+            //   job => job.SendLowStockAlertsAsync(),
+            //   "0 8 * * *");
         }
 
         app.Run();

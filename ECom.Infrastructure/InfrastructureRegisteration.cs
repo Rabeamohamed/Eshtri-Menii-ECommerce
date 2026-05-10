@@ -75,6 +75,9 @@ namespace ECom.Infrastructure
             // Registering Notification Service
             service.AddScoped<INotificationService, NotificationService>();
 
+            // Registering Coupon Service
+            service.AddScoped<ICouponService, CouponService>();
+
             // Apply Authentication Configuration for JWT and Cookies Authentication 
 
             service.AddAuthentication(options =>

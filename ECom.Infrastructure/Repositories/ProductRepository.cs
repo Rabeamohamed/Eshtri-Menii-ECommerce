@@ -62,9 +62,8 @@ namespace ECom.Infrastructure.Repositories
 
             query = query.Skip((productParams.PageNumber - 1) * productParams.PageSize).Take(productParams.PageSize); // Skip the records of previous pages and take only the records of the current page
 
-            //var products = await query.ToListAsync();
-
-            var result = mapper.Map<List<ProductDto>>(query);
+            var products = await query.ToListAsync();
+            var result = mapper.Map<List<ProductDto>>(products);
             return result;
 
         }
