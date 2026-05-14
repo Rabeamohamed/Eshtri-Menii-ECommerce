@@ -1,4 +1,5 @@
 using ECom.Application.DTO.Auth;
+using ECom.Application.Email;
 using ECom.Core.Entities;
 using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -71,7 +72,7 @@ namespace ECom.Infrastructure.Repositories
             var result = new EmailDto(email,
                 "rabea2mohamed@gmail.com",
                 subject,
-                EmailStringBody.send(email, code, component, message, baseUrl));
+                EmailStringBody.Send(email, code, component, message, baseUrl));
             await _emailService.SendEmailAsync(result);
         }
 

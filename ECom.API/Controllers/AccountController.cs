@@ -1,24 +1,30 @@
 using AutoMapper;
 using ECom.Application.DTO.Auth;
 using ECom.Application.DTO.Order;
-using ECom.Core.Entities;
+using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
+using ECom.API.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
-using ECom.Application.Interfaces.Repositories;
-using ECom.Application.Interfaces.Services;
 
 namespace ECom.API.Controllers
 {
     public class AccountController : BaseController
     {
         private readonly IAuthService _authService;
+        private readonly IMapper _mapper;
+        private readonly IOptionsMonitor<CookieAuthOptions> _cookieOptions;
 
-        public AccountController(IUnitOfWork work, IMapper mapper, IAuthService authService) 
-            : base(work, mapper)
+        public AccountController(
+            IAuthService authService,
+            IMapper mapper,
+            IOptionsMonitor<CookieAuthOptions> cookieOptions)
         {
             _authService = authService;
+            _mapper = mapper;
+            _cookieOptions = cookieOptions;
         }
 
         [Authorize]
@@ -26,7 +32,7 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> UpdateAddress(ShippingAddressDto addressDto)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var address = mapper.Map<Address>(addressDto);
+            var address = _mapper.Map<ECom.Core.Entities.Address>(addressDto);
             var result = await _authService.UpdateAddress(email!, address);
             return result ? Ok() : BadRequest();
         }
@@ -39,38 +45,32 @@ namespace ECom.API.Controllers
             {
                 return BadRequest(new ResponseAPI(400, result));
             }
+
             return Ok(new ResponseAPI(200, result));
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            try
-            {
-                var result = await _authService.LoginAsync(loginDto);
-                if (result is null)
-                    return BadRequest(new ResponseAPI(400, "Email or Password is incorrect"));
+            var result = await _authService.LoginAsync(loginDto);
+            if (result is null)
+                return BadRequest(new ResponseAPI(400, "Email or Password is incorrect"));
 
-                if (result.AccessToken.StartsWith("Please") ||
-                    result.AccessToken.StartsWith("Your account"))
-                    return BadRequest(new ResponseAPI(400, result.AccessToken));
+            if (result.AccessToken.StartsWith("Please") ||
+                result.AccessToken.StartsWith("Your account"))
+                return BadRequest(new ResponseAPI(400, result.AccessToken));
 
-                SetTokenCookies(result.AccessToken, result.RefreshToken);
+            SetTokenCookies(result.AccessToken, result.RefreshToken);
 
-                return Ok(new ResponseAPI(200, "Login Successful"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+            return Ok(new ResponseAPI(200, "Login Successful"));
         }
 
         [HttpPost("active-account")]
         public async Task<IActionResult> ActiveAccount(ActiveEmailDto activeEmailDto)
         {
             var result = await _authService.ActiveEmail(activeEmailDto);
-            return result == "User Active Successfully" 
-                ? Ok(new ResponseAPI(200, result)) 
+            return result == "User Active Successfully"
+                ? Ok(new ResponseAPI(200, result))
                 : BadRequest(new ResponseAPI(400, result));
         }
 
@@ -85,54 +85,40 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             var result = await _authService.ResetPassword(resetPasswordDto);
-            return result == "Password Reset and changed Successfully" 
-                ? Ok(new ResponseAPI(200, result)) 
+            return result == "Password Reset and changed Successfully"
+                ? Ok(new ResponseAPI(200, result))
                 : BadRequest(new ResponseAPI(400, result));
         }
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
-            try
-            {
-                var refreshToken = Request.Cookies["refreshToken"];
-                if (string.IsNullOrEmpty(refreshToken))
-                    return Unauthorized(new ResponseAPI(401, "No refresh token found"));
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized(new ResponseAPI(401, "No refresh token found"));
 
-                var result = await _authService.RefreshTokenAsync(refreshToken);
+            var result = await _authService.RefreshTokenAsync(refreshToken);
 
-                if (result.AccessToken.StartsWith("Invalid") ||
-                    result.AccessToken.StartsWith("Refresh token expired"))
-                    return Unauthorized(new ResponseAPI(401, result.AccessToken));
+            if (result.AccessToken.StartsWith("Invalid") ||
+                result.AccessToken.StartsWith("Refresh token expired"))
+                return Unauthorized(new ResponseAPI(401, result.AccessToken));
 
-                SetTokenCookies(result.AccessToken, result.RefreshToken);
+            SetTokenCookies(result.AccessToken, result.RefreshToken);
 
-                return Ok(new ResponseAPI(200, "Token refreshed successfully"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+            return Ok(new ResponseAPI(200, "Token refreshed successfully"));
         }
 
         [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                await _authService.RevokeTokenAsync(userId!);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _authService.RevokeTokenAsync(userId!);
 
-                Response.Cookies.Delete("token");
-                Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete("token");
+            Response.Cookies.Delete("refreshToken");
 
-                return Ok(new ResponseAPI(200, "Logged out successfully"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+            return Ok(new ResponseAPI(200, "Logged out successfully"));
         }
 
         [Authorize]
@@ -148,23 +134,32 @@ namespace ECom.API.Controllers
 
         private void SetTokenCookies(string accessToken, string refreshToken)
         {
+            var opt = _cookieOptions.CurrentValue;
+            var sameSite = Enum.TryParse<SameSiteMode>(opt.SameSite, true, out var ss)
+                ? ss
+                : SameSiteMode.Strict;
+
             var cookieOptions = new CookieOptions
             {
-                Secure = true,
+                Secure = opt.Secure,
                 HttpOnly = true,
-                Domain = "localhost",
                 IsEssential = true,
-                SameSite = SameSiteMode.Strict
+                SameSite = sameSite
             };
+
+            if (!string.IsNullOrWhiteSpace(opt.Domain))
+            {
+                cookieOptions.Domain = opt.Domain;
+            }
 
             Response.Cookies.Append("token", accessToken, new CookieOptions(cookieOptions)
             {
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(opt.AccessTokenMinutes)
             });
 
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions(cookieOptions)
             {
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(opt.RefreshTokenDays)
             });
         }
     }

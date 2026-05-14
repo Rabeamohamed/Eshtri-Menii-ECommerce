@@ -17,7 +17,7 @@ namespace ECom.Application.Interfaces.Services
 
         // Admin methods
         Task<IReadOnlyList<CouponDto>> GetAllCouponsAsync();
-        Task<CouponDto> GetCouponByCodeAsync(string code);
+        Task<CouponDto?> GetCouponByCodeAsync(string code);
         Task<ResponseAPI> CreateCouponAsync(CreateCouponDto dto);
         Task<ResponseAPI> UpdateCouponAsync(int id, CreateCouponDto dto);
         Task<ResponseAPI> DeactivateCouponAsync(int couponId);

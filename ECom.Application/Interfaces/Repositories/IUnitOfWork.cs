@@ -14,5 +14,9 @@ namespace ECom.Application.Interfaces.Repositories
         public ICouponRepository CouponRepository { get; }
         public Task<int> SaveChangesAsync(); // int because return number of affected rows
 
+        /// <summary>
+        /// Runs the delegate inside a single database transaction (EF Core only).
+        /// </summary>
+        Task ExecuteInTransactionAsync(Func<Task> action, CancellationToken cancellationToken = default);
     }
 }

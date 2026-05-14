@@ -1,4 +1,4 @@
-﻿using ECom.Core.Enums;
+using ECom.Core.Enums;
 
 namespace ECom.Application.DTO
 {

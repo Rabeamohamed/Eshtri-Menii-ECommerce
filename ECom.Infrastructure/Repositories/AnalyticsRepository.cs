@@ -35,16 +35,22 @@ namespace ECom.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<CategorySalesDto>> GetCategorySalesAsync()
         {
-            return await _context.Products
-                .Include(p => p.Category)
-                .GroupBy(p => new { p.CategoryId, p.Category.Name })
+            return await _context.OrderItems
+                .Include(oi => oi.Order)
+                .Where(oi => oi.Order.Status == PaymentStatus.PaymentReceived)
+                .Join(_context.Products.Include(p => p.Category),
+                    oi => oi.ProductItemId,
+                    p => p.Id,
+                    (oi, p) => new { oi, p })
+                .GroupBy(x => new { x.p.CategoryId, CategoryName = x.p.Category.Name })
                 .Select(g => new CategorySalesDto
                 {
                     CategoryId = g.Key.CategoryId,
-                    CategoryName = g.Key.Name,
-                    TotalProductsSold = g.Count(),
-                    TotalRevenue = 0 
+                    CategoryName = g.Key.CategoryName,
+                    TotalProductsSold = g.Sum(x => x.oi.Quantity),
+                    TotalRevenue = g.Sum(x => x.oi.Price * x.oi.Quantity)
                 })
+                .OrderByDescending(c => c.TotalRevenue)
                 .ToListAsync();
         }
 
@@ -71,23 +77,25 @@ namespace ECom.Infrastructure.Repositories
 
         public async Task<RevenueDto> GetRevenueAsync()
         {
-            var completedOrders = await _context.Orders
-                .Where(o => o.Status == PaymentStatus.PaymentReceived)
-                .ToListAsync();
+            var query = _context.Orders
+                .Where(o => o.Status == PaymentStatus.PaymentReceived);
 
             var now = DateTime.UtcNow;
-            var totalRevenue = completedOrders.Sum(o => o.SubTotal);
-            var dailyRevenue = completedOrders
+            
+            var totalRevenue = await query.SumAsync(o => o.SubTotal);
+            var dailyRevenue = await query
                 .Where(o => o.OrderDate >= now.AddDays(-1))
-                .Sum(o => o.SubTotal);
-            var weeklyRevenue = completedOrders
+                .SumAsync(o => o.SubTotal);
+            var weeklyRevenue = await query
                 .Where(o => o.OrderDate >= now.AddDays(-7))
-                .Sum(o => o.SubTotal);
-            var monthlyRevenue = completedOrders
+                .SumAsync(o => o.SubTotal);
+            var monthlyRevenue = await query
                 .Where(o => o.OrderDate >= now.AddMonths(-1))
-                .Sum(o => o.SubTotal);
-            var averageOrderValue = completedOrders.Any()
-                ? completedOrders.Average(o => o.SubTotal)
+                .SumAsync(o => o.SubTotal);
+            
+            var orderCount = await query.CountAsync();
+            var averageOrderValue = orderCount > 0
+                ? totalRevenue / orderCount
                 : 0;
 
             return new RevenueDto
@@ -114,6 +122,27 @@ namespace ECom.Infrastructure.Repositories
                 .OrderByDescending(c => c.TotalSpent)
                 .Take(count)
                 .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<BestSellingProductDto>> GetOutOfStockProductsAsync()
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.StockQuantity == 0)
+                .Select(p => new BestSellingProductDto
+                {
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    TotalSold = 0,
+                    TotalRevenue = 0,
+                    CategoryName = p.Category.Name
+                })
+                .ToListAsync();
+        }
+
+        public async Task<int> GetUserCountAsync()
+        {
+            return await _context.Users.CountAsync();
         }
     }
 }

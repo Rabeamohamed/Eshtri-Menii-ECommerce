@@ -33,11 +33,12 @@ namespace ECom.Application.Services.Admin
             var totalProductsTask = _unitOfWork.ProductRepository.CountAsync();
             var outOfStockTask = GetOutOfStockProductsAsync();
             var totalCategoriesTask = _unitOfWork.CategoryRepository.CountAsync();
+            var totalUsersTask = _unitOfWork.AnalyticsRepository.GetUserCountAsync();
 
             await Task.WhenAll(
                 revenueTask, orderStatsTask, bestSellingTask,
                 topCustomersTask, categorySalesTask, totalProductsTask,
-                outOfStockTask, totalCategoriesTask);
+                outOfStockTask, totalCategoriesTask, totalUsersTask);
 
             return new DashboardSummaryDto
             {
@@ -45,7 +46,7 @@ namespace ECom.Application.Services.Admin
                 OrderStats = await orderStatsTask,
                 TotalProducts = await totalProductsTask,
                 OutOfStockProducts = (await outOfStockTask).Count,
-                TotalUsers = 0, // Users count usually handled by AdminUserService/Identity
+                TotalUsers = await totalUsersTask,
                 TotalCategories = await totalCategoriesTask,
                 BestSellingProducts = await bestSellingTask,
                 TopCustomers = await topCustomersTask,
@@ -60,17 +61,7 @@ namespace ECom.Application.Services.Admin
 
         public async Task<IReadOnlyList<BestSellingProductDto>> GetOutOfStockProductsAsync()
         {
-            var products = await _unitOfWork.ProductRepository.GetAllAsync(new ECom.Application.Sharing.ProductParams());
-            return products.Where(p => p.StockQuantity == 0)
-                .Select(p => new BestSellingProductDto
-                {
-                    ProductId = p.Id,
-                    ProductName = p.Name,
-                    TotalSold = 0,
-                    TotalRevenue = 0,
-                    CategoryName = p.CategoryName
-                })
-                .ToList();
+            return await _unitOfWork.AnalyticsRepository.GetOutOfStockProductsAsync();
         }
 
         public async Task<RevenueDto> GetRevenueAsync()

@@ -1,8 +1,6 @@
-using AutoMapper;
 using ECom.Core.Entities.Order;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
 
 namespace ECom.API.Controllers.Admin
@@ -10,11 +8,7 @@ namespace ECom.API.Controllers.Admin
     public class AdminOrderController : AdminBaseController
     {
         private readonly IAdminOrderService _orderService;
-        public AdminOrderController(
-            IUnitOfWork work,
-            IMapper mapper,
-            IAdminOrderService orderService)
-            : base(work, mapper)
+        public AdminOrderController(IAdminOrderService orderService)
         {
             _orderService = orderService;
         }

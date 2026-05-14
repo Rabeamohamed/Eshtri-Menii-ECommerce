@@ -1,13 +1,13 @@
 using ECom.Application.DTO.Auth;
+using ECom.Application.Email;
+using ECom.Application.Interfaces.Persistence;
 using ECom.Application.Interfaces.Services;
 using ECom.Core.Entities;
-using ECom.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using ECom.Infrastructure.Repositories;
 
-namespace ECom.Infrastructure.Service
+namespace ECom.Application.Services
 {
     public class AuthService : IAuthService
     {
@@ -15,7 +15,7 @@ namespace ECom.Infrastructure.Service
         private readonly IEmailService _emailService;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IGenerateToken _generateToken;
-        private readonly AppDbContext _context;
+        private readonly IUserAddressPersistence _userAddressPersistence;
         private readonly IConfiguration _configuration;
 
         public AuthService(
@@ -23,20 +23,20 @@ namespace ECom.Infrastructure.Service
             IEmailService emailService,
             SignInManager<AppUser> signInManager,
             IGenerateToken generateToken,
-            AppDbContext context,
+            IUserAddressPersistence userAddressPersistence,
             IConfiguration configuration)
         {
             _userManager = userManager;
             _emailService = emailService;
             _signInManager = signInManager;
             _generateToken = generateToken;
-            _context = context;
+            _userAddressPersistence = userAddressPersistence;
             _configuration = configuration;
         }
 
         public async Task<string> RegisterAsync(RegisterDto registerDto)
         {
-            if (registerDto == null) return null;
+            if (registerDto == null) return null!;
 
             if (await _userManager.FindByNameAsync(registerDto.UserName) is not null)
                 return "This Username already Registered";
@@ -57,7 +57,6 @@ namespace ECom.Infrastructure.Service
 
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            // Send Activation Email
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await SendActivationEmail(user.Email!, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
 
@@ -66,7 +65,7 @@ namespace ECom.Infrastructure.Service
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
-            if (loginDto == null) return null;
+            if (loginDto == null) return null!;
 
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user is null)
@@ -103,7 +102,7 @@ namespace ECom.Infrastructure.Service
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                RefreshTokenExpiry = (DateTime)user.RefreshTokenExpiryTime
+                RefreshTokenExpiry = (DateTime)user.RefreshTokenExpiryTime!
             };
         }
 
@@ -127,7 +126,7 @@ namespace ECom.Infrastructure.Service
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                RefreshTokenExpiry = (DateTime)user.RefreshTokenExpiryTime
+                RefreshTokenExpiry = (DateTime)user.RefreshTokenExpiryTime!
             };
         }
 
@@ -158,7 +157,6 @@ namespace ECom.Infrastructure.Service
             var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
             if (user is null) return "Invalid Email";
 
-            // Decode the token if it's URL-encoded (comes from email link)
             var decodedToken = Uri.UnescapeDataString(resetPasswordDto.Token);
 
             var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.Password);
@@ -190,24 +188,10 @@ namespace ECom.Infrastructure.Service
             var findUser = await _userManager.FindByEmailAsync(email);
             if (findUser is null) return false;
 
-            var myAddress = await _context.Addresses.FirstOrDefaultAsync(a => a.AppUserId == findUser.Id);
-            if (myAddress is null)
-            {
-                address.AppUserId = findUser.Id;
-                await _context.Addresses.AddAsync(address);
-            }
-            else
-            {
-                address.Id = myAddress.Id;
-                address.AppUserId = findUser.Id;
-                _context.Entry(myAddress).State = EntityState.Detached;
-                _context.Addresses.Update(address);
-            }
-            await _context.SaveChangesAsync();
-            return true;
+            return await _userAddressPersistence.UpsertUserAddressAsync(findUser.Id, address);
         }
 
-        public async Task<UserAuthDto> GetCurrentUserAsync(string email)
+        public async Task<UserAuthDto?> GetCurrentUserAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user is null) return null;
@@ -226,11 +210,11 @@ namespace ECom.Infrastructure.Service
         private async Task SendActivationEmail(string email, string code, string component, string subject, string message)
         {
             var baseUrl = _configuration["Token:Issuer"] ?? "https://localhost:44358";
-            var result = new EmailDto(email,
+            var dto = new EmailDto(email,
                 "rabea2mohamed@gmail.com",
                 subject,
-                EmailStringBody.send(email, code, component, message, baseUrl));
-            await _emailService.SendEmailAsync(result);
+                EmailStringBody.Send(email, code, component, message, baseUrl));
+            await _emailService.SendEmailAsync(dto);
         }
     }
 }

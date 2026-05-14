@@ -1,21 +1,12 @@
-using AutoMapper;
-using ECom.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers
 {
+    // Shared API controller configuration. Persistence is accessed only through application services.
+
     [Route("api/[controller]")]
     [ApiController]
-    public class BaseController : ControllerBase
+    public abstract class BaseController : ControllerBase
     {
-        protected readonly IUnitOfWork work;
-        protected readonly IMapper mapper;
-
-        public BaseController(IUnitOfWork work, IMapper mapper)
-        {
-            this.work = work;
-            this.mapper = mapper;
-        }
     }
-    
 }

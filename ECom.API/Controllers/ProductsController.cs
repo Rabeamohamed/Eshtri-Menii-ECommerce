@@ -1,6 +1,5 @@
-using AutoMapper;
 using ECom.Application.DTO.Product;
-using ECom.Application.Interfaces.Repositories;
+using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,92 +7,61 @@ namespace ECom.API.Controllers
 {
     public class ProductsController : BaseController
     {
-        public ProductsController(IUnitOfWork work, IMapper mapper) : base(work, mapper)
+        private readonly IProductService _productService;
+
+        public ProductsController(IProductService productService)
         {
+            _productService = productService;
         }
 
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllProducts([FromQuery] ProductParams productParams)
         {
-            try
-            {
-                var products = await work.ProductRepository
-                    .GetAllAsync( productParams);
-
-                var totalCount = await work.ProductRepository
-                    .CountAsync(); // Get total count of prodcuts for pagination 
-
-                return Ok(new Pagination<ProductDto>(productParams.PageNumber,productParams.PageSize, totalCount,products));
-            }
-            catch (Exception ex)
-            {
-
-                return BadRequest(ex.Message);
-            }
+            var page = await _productService.GetProductsPageAsync(productParams);
+            return Ok(page);
         }
 
         [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            try
-            {
-                var product = await work.ProductRepository.
-                    GetByIdAsync(id, C => C.Category, P => P.Photos);
-                var result = mapper.Map<ProductDto>(product);
-                if (product is null)
-                {
-                    return BadRequest(new ResponseAPI(404, $"Product Not found with Id {id}"));
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _productService.GetProductByIdAsync(id);
+            if (result is null)
+                return NotFound(new ResponseAPI(404, $"Product not found with id {id}"));
+            return Ok(result);
         }
+
         [HttpPost("create-product")]
         public async Task<IActionResult> CreateProduct(AddProductDto productDto)
         {
-            try
+            var result = await _productService.CreateProductAsync(productDto);
+            return result.StatusCode switch
             {
-                await work.ProductRepository.AddAsync(productDto);
-                return Ok(new ResponseAPI(200, "Product Created Successfuly"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+                201 => StatusCode(201, result),
+                _ => BadRequest(result)
+            };
         }
 
         [HttpPut("update-product")]
         public async Task<IActionResult> UpdateProduct(UpdateProductDto updateProductDto)
         {
-            try
+            var result = await _productService.UpdateProductAsync(updateProductDto);
+            return result.StatusCode switch
             {
-                await work.ProductRepository.UpdateAsync(updateProductDto);
-                return Ok(new ResponseAPI(200, "Product Updated Successfuly"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+                200 => Ok(result),
+                _ => BadRequest(result)
+            };
         }
-        [HttpDelete("delete-product/{Id}")]
 
+        [HttpDelete("delete-product/{Id}")]
         public async Task<IActionResult> DeleteProduct(int Id)
         {
-            try
+            var result = await _productService.DeleteProductAsync(Id);
+            return result.StatusCode switch
             {
-                var product = await work.ProductRepository.GetByIdAsync(
-                    Id, x=>x.Category, y=>y.Photos);
-
-                await work.ProductRepository.DeleteAsync(product);
-                return Ok(new ResponseAPI(200, "Product Deleted Successfuly"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, ex.Message));
-            }
+                200 => Ok(result),
+                404 => NotFound(result),
+                _ => BadRequest(result)
+            };
         }
     }
 }

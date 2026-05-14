@@ -1,6 +1,4 @@
-using AutoMapper;
 using ECom.Application.DTO.Product;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +8,8 @@ namespace ECom.API.Controllers.Admin
     public class AdminProductController : AdminBaseController
     {
         private readonly IAdminProductService _productService;
-        public AdminProductController(IUnitOfWork work, IMapper mapper, IAdminProductService productService) : base(work, mapper)
+
+        public AdminProductController(IAdminProductService productService)
         {
             _productService = productService;
         }

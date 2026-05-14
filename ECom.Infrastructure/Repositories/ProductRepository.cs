@@ -21,6 +21,26 @@ namespace ECom.Infrastructure.Repositories
             this.imageManagementService = imageManagementService;
         }
 
+        public async Task<int> CountAsync(ProductParams productParams)
+        {
+            var query = context.Products.AsNoTracking();
+
+            if (!string.IsNullOrEmpty(productParams.Search))
+            {
+                var searchWords = productParams.Search.Split(" ");
+                query = query.Where(p => searchWords.All(word =>
+                    p.Name.ToLower().Contains(word.ToLower()) ||
+                    p.Description.ToLower().Contains(word.ToLower())));
+            }
+
+            if (productParams.CategoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == productParams.CategoryId.Value);
+            }
+
+            return await query.CountAsync();
+        }
+
         public async Task<IEnumerable<ProductDto>> GetAllAsync(ProductParams productParams)
         {
             var query = context.Products   // Use IQueryable for deferred execution because IQueryable is faster than IEnumerable 

@@ -1,26 +1,21 @@
-
-
-namespace ECom.Infrastructure.Repositories
+namespace ECom.Application.Email
 {
-    public class EmailStringBody
+    public static class EmailStringBody
     {
-        public static string send(string email, string token, string component, string message, string baseUrl)
+        public static string Send(string email, string token, string component, string message, string baseUrl)
         {
             string encodedToken = Uri.EscapeDataString(token);
-            
-            // Remove trailing slash if exists
+
             baseUrl = baseUrl.TrimEnd('/');
 
-            // Generate different links based on component type
-            // Note: Registration activation link goes to API, Reset Password usually goes to Frontend
-            string actionLink = component == "Reset-Password" 
+            string actionLink = component == "Reset-Password"
                 ? $"http://localhost:4200/reset-password?email={email}&token={encodedToken}"
                 : $"http://localhost:4200/activate-email?email={email}&code={encodedToken}";
-            
-            string title = component == "Reset-Password" 
-                ? "Password Reset Request" 
-                : $"Welcome to ECom!";
-            
+
+            string title = component == "Reset-Password"
+                ? "Password Reset Request"
+                : "Welcome to ECom!";
+
             return $@"
             <html> 
                 <head>
@@ -79,5 +74,5 @@ namespace ECom.Infrastructure.Repositories
             </html>
                     ";
         }
-    } 
+    }
 }

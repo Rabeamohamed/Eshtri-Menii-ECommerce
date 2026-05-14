@@ -1,4 +1,4 @@
-﻿using ECom.Core.Entities;
+using ECom.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

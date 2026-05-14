@@ -1,6 +1,4 @@
-using AutoMapper;
 using ECom.Application.DTO.Admin.User;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +9,7 @@ namespace ECom.API.Controllers.Admin
     {
         private readonly IAdminUserService _userService;
 
-        public AdminUserController(
-            IUnitOfWork work,
-            IMapper mapper,
-            IAdminUserService userService)
-            : base(work, mapper)
+        public AdminUserController(IAdminUserService userService)
         {
             _userService = userService;
         }

@@ -1,4 +1,4 @@
-﻿using ECom.Core.Entities;
+using ECom.Core.Entities;
 
 namespace ECom.Application.Interfaces.Repositories
 {

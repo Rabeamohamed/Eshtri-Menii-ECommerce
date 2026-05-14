@@ -17,6 +17,10 @@ using System.Text;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
 using ECom.Application.Interfaces.Services.Admin;
+using ECom.Application.Interfaces.Persistence;
+using ECom.Infrastructure.Payments;
+using ECom.Infrastructure.Persistence;
+using ECom.Application.Interfaces.Payments;
 
 namespace ECom.Infrastructure
 {
@@ -37,12 +41,8 @@ namespace ECom.Infrastructure
             // Registering Token
             service.AddScoped<IGenerateToken, GenerateToken>();
 
-            // Registering Auth Service
-            service.AddScoped<IAuthService, AuthService>();
-
-            //Registering Payment Service
-            service.AddScoped<IPaymentService, PaymentService>();
-
+            service.AddScoped<IUserAddressPersistence, UserAddressPersistence>();
+            service.AddScoped<IStripePaymentGateway, StripePaymentGateway>();
 
             service.AddScoped<IAdminUserService, AdminUserService>();
             service.AddScoped<RoleManager<IdentityRole>>();
@@ -75,8 +75,8 @@ namespace ECom.Infrastructure
             // Registering Notification Service
             service.AddScoped<INotificationService, NotificationService>();
 
-            // Registering Coupon Service
-            service.AddScoped<ICouponService, CouponService>();
+            // Registering Report Service
+            service.AddScoped<IReportService, ReportService>();
 
             // Apply Authentication Configuration for JWT and Cookies Authentication 
 
@@ -99,7 +99,7 @@ namespace ECom.Infrastructure
              
              .AddJwtBearer(op=>
              {
-                 op.RequireHttpsMetadata = false;
+                 op.RequireHttpsMetadata = configuration.GetValue("Jwt:RequireHttpsMetadata", false);
                  op.SaveToken = true;
                  op.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                  {

@@ -1,13 +1,12 @@
 using AutoMapper;
+using ECom.Application.Common.Exceptions;
 using ECom.Application.DTO.Order;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
-using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using ECom.Core.Entities.Order;
 using ECom.Core.Entities.Product;
 using ECom.Core.Entities;
-using ECom.Application.DTO.Coupon;
 using Microsoft.AspNetCore.Identity;
 using ECom.Core.Enums;
 
@@ -40,18 +39,21 @@ namespace ECom.Application.Services
 
         public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string buyerEmail)
         {
+            if (string.IsNullOrWhiteSpace(buyerEmail))
+                throw new BusinessException("Authenticated user email is required.");
+
             var basket = await _unitOfWork.CustomerBasketRepository
                 .GetBasketAsync(orderDto.BasketId);
 
             if (basket is null)
-                throw new Exception("Basket not found");
+                throw new NotFoundException("Basket not found");
 
             var products = new Dictionary<int, Product>();
             foreach (var item in basket.BasketItems)
             {
                 var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.Id);
                 if (product is null)
-                    throw new Exception($"Product not found");
+                    throw new NotFoundException("Product not found");
                 products[item.Id] = product;
             }
 
@@ -59,7 +61,7 @@ namespace ECom.Application.Services
             {
                 var product = products[item.Id];
                 if (product.StockQuantity < item.Quantity)
-                    throw new Exception(
+                    throw new BusinessException(
                         $"'{product.Name}' only has {product.StockQuantity} items in stock");
             }
 
@@ -76,19 +78,16 @@ namespace ECom.Application.Services
                 .GetByIdAsync(orderDto.DeliveryMethodId);
 
             if (deliveryMethod is null)
-                throw new Exception("Delivery method not found");
+                throw new NotFoundException("Delivery method not found");
 
-            // Calculate subtotal (calculate once)
             var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
 
-            // Apply coupon discount if exists
             var discountAmount = 0m;
             if (!string.IsNullOrEmpty(basket.CouponCode))
             {
                 discountAmount = basket.DiscountAmount > 0 ? basket.DiscountAmount : 0;
             }
 
-            // Calculate final total after discount
             var finalTotal = subTotal - discountAmount;
 
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
@@ -98,51 +97,54 @@ namespace ECom.Application.Services
 
             if (existOrder is not null)
             {
-                // Restore stock from existing order before deleting it
-                foreach (var item in existOrder.OrderItems)
+                await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductItemId);
-                    if (product is not null)
+                    foreach (var item in existOrder.OrderItems)
                     {
-                        product.StockQuantity += item.Quantity;
-                        await _unitOfWork.ProductRepository.UpdateAsync(product);
+                        var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductItemId);
+                        if (product is not null)
+                        {
+                            product.StockQuantity += item.Quantity;
+                            await _unitOfWork.ProductRepository.UpdateAsync(product);
+                        }
                     }
-                }
 
-                await _unitOfWork.OrderRepository.DeleteOrderAsync(existOrder);
+                    await _unitOfWork.OrderRepository.DeleteOrderAsync(existOrder);
+                    await _unitOfWork.SaveChangesAsync();
+                });
+
                 await _paymentService.CreateOrUpdatePaymentAsync(
                     basket.Id, deliveryMethod.Id);
+            }
+
+            Orders order = null!;
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                order = new Orders(
+                    buyerEmail, finalTotal, shippingAddress,
+                    deliveryMethod, orderItems, basket.PaymentIntentId);
+
+                await _unitOfWork.OrderRepository.AddOrderAsync(order);
+
+                foreach (var item in basket.BasketItems)
+                {
+                    var product = products[item.Id];
+                    product.StockQuantity -= item.Quantity;
+                    await _unitOfWork.ProductRepository.UpdateAsync(product);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
-            }
 
-            // Create order with final total (after discount)
-            var order = new Orders(
-                buyerEmail, finalTotal, shippingAddress,
-                deliveryMethod, orderItems, basket.PaymentIntentId);
+                if (!string.IsNullOrEmpty(basket.CouponCode) && discountAmount > 0)
+                {
+                    await _couponService.IncrementCouponUsageAsync(basket.CouponCode);
+                }
+            });
 
-            await _unitOfWork.OrderRepository.AddOrderAsync(order);
-
-            // Update product stock
-            foreach (var item in basket.BasketItems)
-            {
-                var product = products[item.Id];
-                product.StockQuantity -= item.Quantity;
-                await _unitOfWork.ProductRepository.UpdateAsync(product);
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-
-            // Apply coupon and increment usage count if coupon was used
-            if (!string.IsNullOrEmpty(basket.CouponCode) && discountAmount > 0)
-            {
-                await _couponService.IncrementCouponUsageAsync(basket.CouponCode);
-            }
-
-            // Delete basket after order is created
             await _unitOfWork.CustomerBasketRepository
                 .DeleteBasketAsync(orderDto.BasketId);
 
-            // Send Notifications
             try
             {
                 var user = await _userManager.FindByEmailAsync(buyerEmail);
@@ -155,7 +157,6 @@ namespace ECom.Application.Services
                         NotificationType.OrderPlaced);
                 }
 
-                // Notify admins
                 await _notificationService.SendToAdminsAsync(
                     "New Order Received! 📦",
                     $"New order #{order.Id} placed by {buyerEmail}",
@@ -163,7 +164,6 @@ namespace ECom.Application.Services
             }
             catch
             {
-                // Logic shouldn't fail if notification fails
             }
 
             return order;

@@ -1,4 +1,4 @@
-﻿namespace ECom.Application.Interfaces.Services
+namespace ECom.Application.Interfaces.Services
 {
     public interface IBackgroundJobService
     {

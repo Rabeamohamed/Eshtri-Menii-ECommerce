@@ -4,14 +4,13 @@ using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
 using ECom.Core.Entities;
 using ECom.Core.Enums;
-using ECom.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
-namespace ECom.Infrastructure.Service
+namespace ECom.Application.Services
 {
     public class CouponService : ICouponService
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public CouponService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -19,30 +18,24 @@ namespace ECom.Infrastructure.Service
 
         public async Task<CouponResultDto> ApplyCouponAsync(ApplyCouponDto dto)
         {
-            // 1. Get basket
             var basket = await _unitOfWork.CustomerBasketRepository
                 .GetBasketAsync(dto.BasketId);
 
             if (basket is null)
                 return new CouponResultDto { Message = "Basket not found", IsSuccess = false };
 
-            // 2. Calculate current basket total
             var basketTotal = basket.BasketItems
                 .Sum(i => i.Price * i.Quantity);
 
-            // 3. Validate coupon
             var validation = await ValidateCouponAsync(dto.Code, basketTotal);
             if (validation.StatusCode != 200)
                 return new CouponResultDto { Message = validation.Message, IsSuccess = false };
 
-            // 4. Get coupon
             var coupon = await _unitOfWork.CouponRepository.GetCouponByCodeAsync(dto.Code);
 
-            // 5. Calculate discount
-            var discountAmount = CalculateDiscount(coupon, basketTotal);
+            var discountAmount = CalculateDiscount(coupon!, basketTotal);
 
-            // 6. Apply to basket
-            basket.CouponCode = coupon.Code;
+            basket.CouponCode = coupon!.Code;
             basket.DiscountAmount = discountAmount;
             await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
 
@@ -74,25 +67,20 @@ namespace ECom.Infrastructure.Service
 
         public async Task<ResponseAPI> ValidateCouponAsync(string code, decimal orderAmount)
         {
-            // 1. Find coupon
             var coupon = await _unitOfWork.CouponRepository.GetCouponByCodeAsync(code);
 
             if (coupon is null)
                 return new ResponseAPI(404, "Coupon not found");
 
-            // 2. Check if active
             if (!coupon.IsActive)
                 return new ResponseAPI(400, "Coupon is no longer active");
 
-            // 3. Check expiry
             if (coupon.ExpiryDate < DateTime.UtcNow)
                 return new ResponseAPI(400, "Coupon has expired");
 
-            // 4. Check usage limit
             if (coupon.UsageLimit > 0 && coupon.UsageCount >= coupon.UsageLimit)
                 return new ResponseAPI(400, "Coupon usage limit reached");
 
-            // 5. Check minimum order amount
             if (orderAmount < coupon.MinimumOrderAmount)
                 return new ResponseAPI(400,
                     $"Minimum order amount for this coupon is ${coupon.MinimumOrderAmount:F2}");
@@ -104,22 +92,22 @@ namespace ECom.Infrastructure.Service
         {
             var coupons = await _unitOfWork.CouponRepository.GetAllAsync();
             return coupons.Select(c => new CouponDto
-                {
-                    Id = c.Id,
-                    Code = c.Code,
-                    Description = c.Description,
-                    Type = c.Type.ToString(),
-                    DiscountValue = c.DiscountValue,
-                    MinimumOrderAmount = c.MinimumOrderAmount,
-                    MaxDiscountAmount = c.MaxDiscountAmount,
-                    ExpiryDate = c.ExpiryDate,
-                    IsActive = c.IsActive,
-                    UsageLimit = c.UsageLimit,
-                    UsageCount = c.UsageCount
-                }).ToList();
+            {
+                Id = c.Id,
+                Code = c.Code,
+                Description = c.Description,
+                Type = c.Type.ToString(),
+                DiscountValue = c.DiscountValue,
+                MinimumOrderAmount = c.MinimumOrderAmount,
+                MaxDiscountAmount = c.MaxDiscountAmount,
+                ExpiryDate = c.ExpiryDate,
+                IsActive = c.IsActive,
+                UsageLimit = c.UsageLimit,
+                UsageCount = c.UsageCount
+            }).ToList();
         }
 
-        public async Task<CouponDto> GetCouponByCodeAsync(string code)
+        public async Task<CouponDto?> GetCouponByCodeAsync(string code)
         {
             var coupon = await _unitOfWork.CouponRepository.GetCouponByCodeAsync(code);
 
@@ -143,17 +131,14 @@ namespace ECom.Infrastructure.Service
 
         public async Task<ResponseAPI> CreateCouponAsync(CreateCouponDto dto)
         {
-            // Check if code already exists
             var existingCoupon = await _unitOfWork.CouponRepository.GetCouponByCodeAsync(dto.Code);
 
             if (existingCoupon != null)
                 return new ResponseAPI(400, "Coupon code already exists");
 
-            // Parse type
-            if (!Enum.TryParse<CouponType>(dto.Type ,true, out var couponType))
+            if (!Enum.TryParse<CouponType>(dto.Type, true, out var couponType))
                 return new ResponseAPI(400, "Invalid coupon type. Use 'Percentage' or 'FixedAmount'");
 
-            // Validate percentage
             if (couponType == CouponType.Percentage && dto.DiscountValue > 100)
                 return new ResponseAPI(400, "Percentage discount cannot exceed 100%");
 
@@ -183,7 +168,6 @@ namespace ECom.Infrastructure.Service
             if (coupon == null)
                 return new ResponseAPI(404, "Coupon not found");
 
-            // Check if code is being changed and already exists
             if (coupon.Code.ToUpper() != dto.Code.ToUpper())
             {
                 var existingCoupon = await _unitOfWork.CouponRepository.GetCouponByCodeAsync(dto.Code);
@@ -191,11 +175,9 @@ namespace ECom.Infrastructure.Service
                     return new ResponseAPI(400, "Coupon code already exists");
             }
 
-            // Parse type
             if (!Enum.TryParse<CouponType>(dto.Type, true, out var couponType))
                 return new ResponseAPI(400, "Invalid coupon type. Use 'Percentage' or 'FixedAmount'");
 
-            // Validate percentage
             if (couponType == CouponType.Percentage && dto.DiscountValue > 100)
                 return new ResponseAPI(400, "Percentage discount cannot exceed 100%");
 
@@ -251,24 +233,20 @@ namespace ECom.Infrastructure.Service
             }
         }
 
-        // ✅ Private helper — calculate discount amount
-        private decimal CalculateDiscount(Coupon coupon, decimal orderAmount)
+        private static decimal CalculateDiscount(Coupon coupon, decimal orderAmount)
         {
-            decimal discount = 0;
+            decimal discount;
 
             if (coupon.Type == CouponType.Percentage)
             {
                 discount = orderAmount * (coupon.DiscountValue / 100);
 
-                // Apply max discount cap if set
                 if (coupon.MaxDiscountAmount.HasValue)
                     discount = Math.Min(discount, coupon.MaxDiscountAmount.Value);
             }
-            else // FixedAmount
+            else
             {
                 discount = coupon.DiscountValue;
-
-                // Can't discount more than order total
                 discount = Math.Min(discount, orderAmount);
             }
 

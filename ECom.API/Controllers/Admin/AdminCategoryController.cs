@@ -1,6 +1,4 @@
-using AutoMapper;
 using ECom.Application.DTO.Category;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +8,7 @@ namespace ECom.API.Controllers.Admin
     public class AdminCategoryController : AdminBaseController
     {
         private readonly IAdminCategoryService _categoryService;
-        public AdminCategoryController(IUnitOfWork work, IMapper mapper, IAdminCategoryService categoryService) : base(work, mapper)
+        public AdminCategoryController(IAdminCategoryService categoryService)
         {
             _categoryService = categoryService;
         }

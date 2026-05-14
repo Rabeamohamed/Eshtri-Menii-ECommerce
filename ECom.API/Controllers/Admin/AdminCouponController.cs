@@ -1,23 +1,15 @@
-using AutoMapper;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
 using ECom.Application.DTO.Coupon;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers.Admin
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class AdminCouponController : AdminBaseController
     {
         private readonly ICouponService _couponService;
-        public AdminCouponController(
-            IUnitOfWork work, 
-            IMapper mapper, 
-            ICouponService couponService) 
-            : base(work, mapper)
+
+        public AdminCouponController(ICouponService couponService)
         {
             _couponService = couponService;
         }

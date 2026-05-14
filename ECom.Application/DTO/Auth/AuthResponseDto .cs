@@ -1,4 +1,4 @@
-﻿
+
 namespace ECom.Application.DTO.Auth
 {
     public record AuthResponseDto

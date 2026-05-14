@@ -9,5 +9,7 @@ namespace ECom.Application.Interfaces.Repositories
         Task<OrderStatsDto> GetOrderStatsAsync();
         Task<RevenueDto> GetRevenueAsync();
         Task<IReadOnlyList<TopCustomerDto>> GetTopCustomersAsync(int count);
+        Task<IReadOnlyList<BestSellingProductDto>> GetOutOfStockProductsAsync();
+        Task<int> GetUserCountAsync();
     }
 }

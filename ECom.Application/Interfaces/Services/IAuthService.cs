@@ -13,6 +13,6 @@ namespace ECom.Application.Interfaces.Services
         Task<string> ResetPassword(ResetPasswordDto resetPasswordDto);
         Task<string> ActiveEmail(ActiveEmailDto activeEmailDto);
         Task<bool> UpdateAddress(string email, Address address);
-        Task<UserAuthDto> GetCurrentUserAsync(string email);
+        Task<UserAuthDto?> GetCurrentUserAsync(string email);
     }
 }

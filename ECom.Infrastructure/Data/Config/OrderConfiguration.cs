@@ -1,4 +1,4 @@
-﻿using ECom.Core.Entities.Order;
+using ECom.Core.Entities.Order;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

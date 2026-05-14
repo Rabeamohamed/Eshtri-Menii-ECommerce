@@ -1,5 +1,3 @@
-using AutoMapper;
-using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
 using ECom.Application.Sharing;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +9,7 @@ namespace ECom.API.Controllers.Admin
     {
         private readonly IAdminAnalyticsService _analyticsService;
 
-        public AdminAnalyticsController(
-            IUnitOfWork work,
-            IMapper mapper,
-            IAdminAnalyticsService analyticsService)
-            : base(work, mapper)
+        public AdminAnalyticsController(IAdminAnalyticsService analyticsService)
         {
             _analyticsService = analyticsService;
         }

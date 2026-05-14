@@ -1,4 +1,4 @@
-﻿using Hangfire.Dashboard;
+using Hangfire.Dashboard;
 
 namespace ECom.API.Middleware
 {
