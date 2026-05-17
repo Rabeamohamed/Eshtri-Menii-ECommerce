@@ -44,9 +44,13 @@ namespace ECom.Infrastructure.Service
 
         public void DeleteImageAsync(string src)
         {
-            var info= fileProvider.GetFileInfo(src);
+            if (string.IsNullOrWhiteSpace(src)) return;
 
+            var info = fileProvider.GetFileInfo(src);
             var root = info.PhysicalPath;
+            if (string.IsNullOrEmpty(root) || !info.Exists)
+                return;
+
             File.Delete(root);
         }
     }

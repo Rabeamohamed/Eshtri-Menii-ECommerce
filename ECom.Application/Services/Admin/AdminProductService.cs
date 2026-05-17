@@ -20,22 +20,24 @@ namespace ECom.Application.Services.Admin
         public async Task<ResponseAPI> CreateProductAsync(AddProductDto dto)
         {
             if (dto is null)
-            {
                 return new ResponseAPI(400, "Product data is required");
-            }
-            await _unitOfWork.ProductRepository.AddAsync(dto);
-            return new ResponseAPI(201, "Product created successfully");
+            if (dto.CategoryId <= 0)
+                return new ResponseAPI(400, "A valid category is required");
+
+            var ok = await _unitOfWork.ProductRepository.AddAsync(dto);
+            return ok
+                ? new ResponseAPI(201, "Product created successfully")
+                : new ResponseAPI(400, "Failed to create product");
         }
 
         public async Task<ResponseAPI> DeleteProductAsync(int id)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id, p => p.Category, p => p.Photos);
             if (product is null)
-            {
                 return new ResponseAPI(404, "Product not found");
-            }
-            await _unitOfWork.ProductRepository.DeleteAsync(id);
-            return new ResponseAPI(200, "Product Deleted successfully");
+
+            await _unitOfWork.ProductRepository.DeleteAsync(product);
+            return new ResponseAPI(200, "Product deleted successfully");
         }
 
         public async Task<IReadOnlyList<ProductDto>> GetAllProductsAsync(ProductParams productParams)
@@ -44,7 +46,7 @@ namespace ECom.Application.Services.Admin
             return products.ToList();
         }
 
-        public async Task<ProductDto> GetProductByIdAsync(int id)
+        public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id, p => p.Category, product => product.Photos);
             if (product is null)
@@ -52,23 +54,24 @@ namespace ECom.Application.Services.Admin
             return _mapper.Map<ProductDto>(product);
         }
 
-        public async Task<int> GetTotalCountAsync()
-            => await _unitOfWork.ProductRepository.CountAsync();
+        public async Task<int> GetTotalCountAsync(ProductParams productParams)
+            => await _unitOfWork.ProductRepository.CountAsync(productParams);
 
         public async Task<ResponseAPI> UpdateProductAsync(UpdateProductDto dto)
         {
             if (dto is null)
-            {
                 return new ResponseAPI(400, "Product data is required");
-            }
+            if (dto.CategoryId <= 0)
+                return new ResponseAPI(400, "A valid category is required");
+
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(dto.Id);
             if (product is null)
-            {
                 return new ResponseAPI(404, "Product not found");
-            }
 
-            await _unitOfWork.ProductRepository.UpdateAsync(dto);
-            return new ResponseAPI(200, "Product updated successfully");
+            var ok = await _unitOfWork.ProductRepository.UpdateAsync(dto);
+            return ok
+                ? new ResponseAPI(200, "Product updated successfully")
+                : new ResponseAPI(400, "Failed to update product");
         }
     }
 }

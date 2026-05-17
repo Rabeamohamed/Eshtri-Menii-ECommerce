@@ -20,11 +20,18 @@ namespace ECom.API.Controllers
             _mapper = mapper;
         }
 
+        private string? BuyerEmail => User.FindFirst(ClaimTypes.Email)?.Value;
+
         [HttpPost("create-order")]
-        public async Task<ActionResult> Create(OrderDto orderDto)
+        public async Task<ActionResult> Create([FromBody] OrderDto orderDto)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var order = await _orderService.CreateOrderAsync(orderDto, email!);
+            var email = BuyerEmail;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
+            if (orderDto is null)
+                return BadRequest(new ResponseAPI(400, "Order payload is required."));
+
+            var order = await _orderService.CreateOrderAsync(orderDto, email);
 
             if (order is null)
                 return BadRequest(new ResponseAPI(400, "Problem creating order"));
@@ -33,32 +40,42 @@ namespace ECom.API.Controllers
         }
 
         [HttpGet("get-orders-for-user")]
-        public async Task<IActionResult> GetOrdersFOrUser()
+        public async Task<IActionResult> GetOrdersForUser()
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var orders = await _orderService.GetAllOrdersForUserAsync(email!);
+            var email = BuyerEmail;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
+
+            var orders = await _orderService.GetAllOrdersForUserAsync(email);
             return Ok(orders);
         }
 
         [HttpGet("get-order-by-id/{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var order = await _orderService.GetOrderByIdAsync(id, email!);
-            if (order == null)
-                return NotFound(new { message = "Order not found" });
+            var email = BuyerEmail;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
+
+            var order = await _orderService.GetOrderByIdAsync(id, email);
+            if (order is null)
+                return NotFound(new ResponseAPI(404, "Order not found"));
             return Ok(order);
         }
 
         [HttpGet("get-delivery")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDeliver()
             => Ok(await _orderService.GetDeliveryMethodAsync());
 
         [HttpPut("cancel/{orderId}")]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var result = await _orderService.CancelOrderAsync(orderId, email!, isAdmin: false);
+            var email = BuyerEmail;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
+
+            var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: false);
 
             return result.StatusCode switch
             {
@@ -73,8 +90,11 @@ namespace ECom.API.Controllers
         [HttpPut("admin-cancel/{orderId}")]
         public async Task<IActionResult> AdminCancelOrder(int orderId)
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var result = await _orderService.CancelOrderAsync(orderId, email!, isAdmin: true);
+            var email = BuyerEmail;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
+
+            var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: true);
 
             return result.StatusCode switch
             {

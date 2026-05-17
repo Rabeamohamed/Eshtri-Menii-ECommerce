@@ -74,6 +74,8 @@ internal class Program
         app.UseStatusCodePagesWithReExecute("/errors/{0}");
         app.UseHttpsRedirection();
 
+        app.UseStaticFiles();
+
         app.Use(async (context, next) =>
         {
             if (context.Request.Path.StartsWithSegments("/api/payment/webhook"))

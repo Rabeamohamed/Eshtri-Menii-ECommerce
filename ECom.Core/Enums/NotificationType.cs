@@ -8,5 +8,7 @@ public enum NotificationType
     AccountBlocked,
     AccountUnblocked,
     PaymentFailed,
-    NewOrder
+    NewOrder,
+    OrderShipped,
+    OrderDelivered
 }

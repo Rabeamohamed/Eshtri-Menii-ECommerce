@@ -1,3 +1,4 @@
+using ECom.Application.Common.Exceptions;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services;
 using ECom.Application.Sharing;
@@ -16,19 +17,34 @@ namespace ECom.Application.Services
 
         public async Task<CustomerBasket?> GetBasketAsync(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+                return null;
+
             return await _unitOfWork.CustomerBasketRepository.GetBasketAsync(id);
         }
 
         public async Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket)
         {
-            return await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            if (basket is null || string.IsNullOrWhiteSpace(basket.Id))
+                throw new BusinessException("Basket id is required.");
+
+            basket.BasketItems ??= new List<BasketItem>();
+
+            var updated = await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            if (updated is null)
+                throw new BusinessException("Could not save basket. Please try again.");
+
+            return updated;
         }
 
         public async Task<ResponseAPI> DeleteBasketAsync(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+                return new ResponseAPI(400, "Basket id is required");
+
             var deleted = await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(id);
             return deleted
-                ? new ResponseAPI(200, "Item deleted successfully")
+                ? new ResponseAPI(200, "Basket deleted successfully")
                 : new ResponseAPI(400, "Failed to delete basket");
         }
     }

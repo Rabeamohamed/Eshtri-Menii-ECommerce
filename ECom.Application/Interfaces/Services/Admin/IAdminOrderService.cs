@@ -10,7 +10,7 @@ namespace ECom.Application.Interfaces.Services.Admin
         Task<IReadOnlyList<OrderToReturnDto>> GetAllOrdersAsync(PaymentStatus? status = null);
 
         // Get order by id
-        Task<OrderToReturnDto> GetOrderByIdAsync(int id);
+        Task<OrderToReturnDto?> GetOrderByIdAsync(int id);
 
         // Update order status
         Task<ResponseAPI> UpdateOrderStatusAsync(int orderId, PaymentStatus status);

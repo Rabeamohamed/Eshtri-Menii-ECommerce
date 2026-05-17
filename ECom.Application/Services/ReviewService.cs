@@ -25,6 +25,9 @@ namespace ECom.Application.Services
 
         public async Task<ResponseAPI> AddReviewAsync(CreateReviewDto dto, string userId, string userEmail)
         {
+            if (dto is null)
+                return new ResponseAPI(400, "Review data is required.");
+
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(dto.ProductId);
             if (product is null)
             {
@@ -61,6 +64,9 @@ namespace ECom.Application.Services
 
         public async Task<ResponseAPI> UpdateReviewAsync(UpdateReviewDto dto, string userId)
         {
+            if (dto is null)
+                return new ResponseAPI(400, "Review data is required.");
+
             var review = await _unitOfWork.ReviewRepository.GetReviewByIdAsync(dto.ReviewId);
             if (review is null)
                 return new ResponseAPI(404, "Review not found");

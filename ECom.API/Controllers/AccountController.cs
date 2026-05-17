@@ -29,17 +29,25 @@ namespace ECom.API.Controllers
 
         [Authorize]
         [HttpPut("update-address")]
-        public async Task<IActionResult> UpdateAddress(ShippingAddressDto addressDto)
+        public async Task<IActionResult> UpdateAddress([FromBody] ShippingAddressDto? addressDto)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ResponseAPI(401, "Not authenticated."));
+            if (addressDto is null)
+                return BadRequest(new ResponseAPI(400, "Address is required."));
+
             var address = _mapper.Map<ECom.Core.Entities.Address>(addressDto);
-            var result = await _authService.UpdateAddress(email!, address);
-            return result ? Ok() : BadRequest();
+            var result = await _authService.UpdateAddress(email, address);
+            return result ? Ok() : BadRequest(new ResponseAPI(400, "Could not update address."));
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto? registerDto)
         {
+            if (registerDto is null)
+                return BadRequest(new ResponseAPI(400, "Registration data is required."));
+
             var result = await _authService.RegisterAsync(registerDto);
             if (result != "User Registered Successfully")
             {
@@ -50,14 +58,20 @@ namespace ECom.API.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto? loginDto)
         {
+            if (loginDto is null)
+                return BadRequest(new ResponseAPI(400, "Login data is required."));
+
             var result = await _authService.LoginAsync(loginDto);
-            if (result is null)
+            if (result is null || string.IsNullOrEmpty(result.AccessToken))
                 return BadRequest(new ResponseAPI(400, "Email or Password is incorrect"));
 
-            if (result.AccessToken.StartsWith("Please") ||
-                result.AccessToken.StartsWith("Your account"))
+            if (string.IsNullOrEmpty(result.RefreshToken))
+                return BadRequest(new ResponseAPI(400, result.AccessToken));
+
+            if (result.AccessToken.StartsWith("Please", StringComparison.Ordinal) ||
+                result.AccessToken.StartsWith("Your account", StringComparison.Ordinal))
                 return BadRequest(new ResponseAPI(400, result.AccessToken));
 
             SetTokenCookies(result.AccessToken, result.RefreshToken);
@@ -99,9 +113,10 @@ namespace ECom.API.Controllers
 
             var result = await _authService.RefreshTokenAsync(refreshToken);
 
-            if (result.AccessToken.StartsWith("Invalid") ||
-                result.AccessToken.StartsWith("Refresh token expired"))
-                return Unauthorized(new ResponseAPI(401, result.AccessToken));
+            if (string.IsNullOrEmpty(result.AccessToken) ||
+                result.AccessToken.StartsWith("Invalid", StringComparison.Ordinal) ||
+                result.AccessToken.StartsWith("Refresh token expired", StringComparison.Ordinal))
+                return Unauthorized(new ResponseAPI(401, result.AccessToken ?? "Invalid refresh token"));
 
             SetTokenCookies(result.AccessToken, result.RefreshToken);
 
@@ -113,7 +128,8 @@ namespace ECom.API.Controllers
         public async Task<IActionResult> Logout()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            await _authService.RevokeTokenAsync(userId!);
+            if (!string.IsNullOrEmpty(userId))
+                await _authService.RevokeTokenAsync(userId);
 
             Response.Cookies.Delete("token");
             Response.Cookies.Delete("refreshToken");

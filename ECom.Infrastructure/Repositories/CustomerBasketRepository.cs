@@ -8,34 +8,38 @@ namespace ECom.Infrastructure.Repositories
     public class CustomerBasketRepository : ICustomerBasketRepository
     {
         private readonly IDatabase _database;
+
         public CustomerBasketRepository(IConnectionMultiplexer redis)
         {
             _database = redis.GetDatabase();
         }
+
         public Task<bool> DeleteBasketAsync(string id)
+            => _database.KeyDeleteAsync(id);
+
+        public async Task<CustomerBasket?> GetBasketAsync(string id)
         {
-            return _database.KeyDeleteAsync(id);
+            var result = await _database.StringGetAsync(id);
+            if (result.IsNullOrEmpty)
+                return null;
+
+            return JsonSerializer.Deserialize<CustomerBasket>(result!);
         }
 
-        public async Task<CustomerBasket> GetBasketAsync(string id)
+        public async Task<CustomerBasket?> UpdateBasketAsync(CustomerBasket basket)
         {
-            var result =await _database.StringGetAsync(id);
-            if (!string.IsNullOrEmpty(result))
-            {
-                return JsonSerializer.Deserialize<CustomerBasket>(result);
-            }
-            return null;
+            if (basket is null || string.IsNullOrWhiteSpace(basket.Id))
+                return null;
 
-        }
+            var ok = await _database.StringSetAsync(
+                basket.Id,
+                JsonSerializer.Serialize(basket),
+                TimeSpan.FromDays(3));
 
-        public async Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket)
-        {
-            var _basket = await _database.StringSetAsync(basket.Id, JsonSerializer.Serialize(basket), TimeSpan.FromDays(3));
-            if (_basket)
-            {
-                return await GetBasketAsync(basket.Id);
-            }
-            return null;
+            if (!ok)
+                return null;
+
+            return await GetBasketAsync(basket.Id);
         }
     }
 }

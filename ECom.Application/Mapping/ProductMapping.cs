@@ -11,8 +11,10 @@ namespace ECom.Application.Mapping
         {
             // CreateMap<Source, Destination>();
             CreateMap<Product, ProductDto>()
-                .ForMember(x=>x.CategoryName  // Map Category.Name to CategoryName in ProductDto
-                , op => op.MapFrom(x => x.Category.Name)).ReverseMap();
+                .ForMember(x => x.CategoryName,
+                    op => op.MapFrom(x => x.Category.Name))
+                .ForMember(x => x.CategoryId,
+                    op => op.MapFrom(x => x.CategoryId));
 
             CreateMap<AddProductDto , Product>()
                 .ForMember(p => p.Photos, op =>op.Ignore())

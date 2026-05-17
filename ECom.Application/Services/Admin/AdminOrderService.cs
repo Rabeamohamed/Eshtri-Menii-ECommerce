@@ -4,6 +4,10 @@ using ECom.Core.Entities.Order;
 using ECom.Application.Sharing;
 using ECom.Application.Interfaces.Repositories;
 using ECom.Application.Interfaces.Services.Admin;
+using ECom.Application.Interfaces.Services;
+using ECom.Core.Enums;
+using Microsoft.AspNetCore.Identity;
+using ECom.Core.Entities;
 
 namespace ECom.Application.Services.Admin
 {
@@ -11,11 +15,19 @@ namespace ECom.Application.Services.Admin
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
+        private readonly UserManager<AppUser> _userManager;
 
-        public AdminOrderService(IUnitOfWork unitOfWork, IMapper mapper)
+        public AdminOrderService(
+            IUnitOfWork unitOfWork, 
+            IMapper mapper, 
+            INotificationService notificationService,
+            UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         public async Task<IReadOnlyList<OrderToReturnDto>> GetAllOrdersAsync(PaymentStatus? status = null)
@@ -24,7 +36,7 @@ namespace ECom.Application.Services.Admin
             return _mapper.Map<IReadOnlyList<OrderToReturnDto>>(orders);
         }
 
-        public async Task<OrderToReturnDto> GetOrderByIdAsync(int id)
+        public async Task<OrderToReturnDto?> GetOrderByIdAsync(int id)
         {
             var order = await _unitOfWork.OrderRepository.GetOrderByIdAsync(id);
             if (order is null) return null;
@@ -46,6 +58,32 @@ namespace ECom.Application.Services.Admin
             order.Status = status;
             await _unitOfWork.OrderRepository.UpdateOrderAsync(order);
             await _unitOfWork.SaveChangesAsync();
+
+            // Notify user
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(order.BuyerEmail);
+                if (user != null)
+                {
+                    var (title, msg) = status switch
+                    {
+                        PaymentStatus.Shipped => ("🚚 Order Shipped", $"Your order #{order.Id} is on its way!"),
+                        PaymentStatus.Delivered => ("📦 Order Delivered", $"Your order #{order.Id} has been delivered. Enjoy!"),
+                        _ => ($"Order Update: {status}", $"The status of your order #{order.Id} has been updated to {status}.")
+                    };
+
+                    var nType = status switch
+                    {
+                        PaymentStatus.Shipped => NotificationType.OrderShipped,
+                        PaymentStatus.Delivered => NotificationType.OrderDelivered,
+                        _ => NotificationType.OrderPlaced // Fallback
+                    };
+
+                    await _notificationService.SendToUserAsync(
+                        user.Id, title, msg, nType);
+                }
+            }
+            catch { /* Ignore notification failures */ }
 
             return new ResponseAPI(200, $"Order status updated to {status} successfully");
         }

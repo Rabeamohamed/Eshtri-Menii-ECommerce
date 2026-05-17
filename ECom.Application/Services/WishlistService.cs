@@ -38,7 +38,7 @@ namespace ECom.Application.Services
             }
 
             var alreadyExists = await _unitOfWork.WishlistRepository.IsProductInWishlistAsync(dto.ProductId, userId);
-            if (!alreadyExists)
+            if (alreadyExists)
             {
                 return new ResponseAPI(400, "Product is already in wishlist.");
             }
@@ -57,7 +57,7 @@ namespace ECom.Application.Services
                 return new ResponseAPI(400, "Failed to add to wishlist.");
             }
 
-            return new ResponseAPI(200, "Product added to wishlist successfully.");
+            return new ResponseAPI(201, "Product added to wishlist successfully.");
         }
 
         public async Task<ResponseAPI> RemoveFromWishlistAsync(int productId, string userId)
@@ -137,7 +137,10 @@ namespace ECom.Application.Services
                 });
             }
 
-            await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            var updated = await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            if (updated is null)
+                return new ResponseAPI(400, "Could not update basket.");
+
             await _unitOfWork.WishlistRepository.RemoveFromWishlistAsync(wishlistItem);
             await _unitOfWork.SaveChangesAsync();
 

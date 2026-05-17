@@ -40,7 +40,8 @@ namespace ECom.API.Middleware
                     var response = new ApiExceptions(
                         (int)HttpStatusCode.TooManyRequests, "Too many requests. Please try again later.");
 
-                    await context.Response.WriteAsJsonAsync(response);
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    await context.Response.WriteAsJsonAsync(response, options);
                     return;
                 }
 
@@ -52,7 +53,8 @@ namespace ECom.API.Middleware
                 context.Response.StatusCode = bex.StatusCode;
                 context.Response.ContentType = "application/json";
                 var response = new ApiExceptions(bex.StatusCode, bex.Message);
-                await context.Response.WriteAsJsonAsync(response);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                await context.Response.WriteAsJsonAsync(response, options);
             }
             catch (Exception ex)
             {
@@ -63,7 +65,9 @@ namespace ECom.API.Middleware
                 var response = _environment.IsDevelopment()
                     ? new ApiExceptions(context.Response.StatusCode, ex.Message, ex.StackTrace)
                     : new ApiExceptions(context.Response.StatusCode, "An unexpected error occurred.");
-                var json = JsonSerializer.Serialize(response);
+                
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.Serialize(response, options);
 
                 await context.Response.WriteAsync(json);
             }

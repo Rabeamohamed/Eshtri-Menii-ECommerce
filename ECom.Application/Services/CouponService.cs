@@ -37,7 +37,9 @@ namespace ECom.Application.Services
 
             basket.CouponCode = coupon!.Code;
             basket.DiscountAmount = discountAmount;
-            await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            var updated = await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            if (updated is null)
+                return new CouponResultDto { Message = "Could not update basket with coupon", IsSuccess = false };
 
             return new CouponResultDto
             {
@@ -45,7 +47,7 @@ namespace ECom.Application.Services
                 OriginalAmount = basketTotal,
                 DiscountAmount = discountAmount,
                 FinalAmount = basketTotal - discountAmount,
-                Message = $"Coupon applied! You saved ${discountAmount:F2}",
+                Message = $"Coupon applied! You saved EGP {discountAmount:F2}",
                 IsSuccess = true
             };
         }
@@ -58,10 +60,13 @@ namespace ECom.Application.Services
             if (basket is null)
                 return new ResponseAPI(404, "Basket not found");
 
-            basket.CouponCode = null;
+            basket.CouponCode = string.Empty;
             basket.DiscountAmount = 0;
 
-            await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            var updated = await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
+            if (updated is null)
+                return new ResponseAPI(400, "Could not update basket");
+
             return new ResponseAPI(200, "Coupon removed successfully");
         }
 

@@ -14,6 +14,7 @@ namespace ECom.Application.DTO.Product
         public decimal OldPrice { get; init; }
         public decimal NewPrice { get; init; }
         public List<PhotoDto> Photos { get; init; }
+        public int CategoryId { get; init; }
         public string CategoryName { get; init; }
         public double AverageRating { get; init; }
         public int TotalReviews { get; init; }

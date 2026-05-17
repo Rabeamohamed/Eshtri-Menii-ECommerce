@@ -39,6 +39,10 @@ namespace ECom.Application.Services
 
         public async Task<Orders> CreateOrderAsync(OrderDto orderDto, string buyerEmail)
         {
+            if (orderDto is null)
+                throw new BusinessException("Order payload is required.");
+            if (string.IsNullOrWhiteSpace(orderDto.BasketId))
+                throw new BusinessException("Basket id is required.");
             if (string.IsNullOrWhiteSpace(buyerEmail))
                 throw new BusinessException("Authenticated user email is required.");
 
@@ -79,6 +83,9 @@ namespace ECom.Application.Services
 
             if (deliveryMethod is null)
                 throw new NotFoundException("Delivery method not found");
+
+            if (orderDto.ShippingAddress is null)
+                throw new BusinessException("Shipping address is required.");
 
             var subTotal = orderItems.Sum(o => o.Price * o.Quantity);
 
@@ -177,7 +184,7 @@ namespace ECom.Application.Services
             return _mapper.Map<IReadOnlyList<OrderToReturnDto>>(orders);
         }
 
-        public async Task<OrderToReturnDto> GetOrderByIdAsync(int id, string buyerEmail)
+        public async Task<OrderToReturnDto?> GetOrderByIdAsync(int id, string buyerEmail)
         {
             var order = await _unitOfWork.OrderRepository
                 .GetOrderByIdAsync(id, buyerEmail);
@@ -209,7 +216,9 @@ namespace ECom.Application.Services
             if (!isAdmin && order.Status == PaymentStatus.PaymentReceived)
                 return new ResponseAPI(400, "Paid orders can only be cancelled by admin");
 
-            if (order.Status == PaymentStatus.PaymentReceived)
+            var wasPaid = order.Status == PaymentStatus.PaymentReceived;
+
+            if (wasPaid)
             {
                 var refundSuccess = await _paymentService
                     .RefundPaymentAsync(order.PaymentIntentId);
@@ -231,7 +240,7 @@ namespace ECom.Application.Services
             order.Status = PaymentStatus.Cancelled;
             await _unitOfWork.SaveChangesAsync();
 
-            return new ResponseAPI(200, order.Status == PaymentStatus.PaymentReceived
+            return new ResponseAPI(200, wasPaid
                 ? "Order cancelled and refund initiated successfully"
                 : "Order cancelled and stock restored successfully");
         }
