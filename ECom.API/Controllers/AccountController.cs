@@ -49,11 +49,6 @@ namespace ECom.API.Controllers
                 return BadRequest(new ResponseAPI(400, "Registration data is required."));
 
             var result = await _authService.RegisterAsync(registerDto);
-            if (result != "User Registered Successfully")
-            {
-                return BadRequest(new ResponseAPI(400, result));
-            }
-
             return Ok(new ResponseAPI(200, result));
         }
 
@@ -64,16 +59,6 @@ namespace ECom.API.Controllers
                 return BadRequest(new ResponseAPI(400, "Login data is required."));
 
             var result = await _authService.LoginAsync(loginDto);
-            if (result is null || string.IsNullOrEmpty(result.AccessToken))
-                return BadRequest(new ResponseAPI(400, "Email or Password is incorrect"));
-
-            if (string.IsNullOrEmpty(result.RefreshToken))
-                return BadRequest(new ResponseAPI(400, result.AccessToken));
-
-            if (result.AccessToken.StartsWith("Please", StringComparison.Ordinal) ||
-                result.AccessToken.StartsWith("Your account", StringComparison.Ordinal))
-                return BadRequest(new ResponseAPI(400, result.AccessToken));
-
             SetTokenCookies(result.AccessToken, result.RefreshToken);
 
             return Ok(new ResponseAPI(200, "Login Successful"));
@@ -112,12 +97,6 @@ namespace ECom.API.Controllers
                 return Unauthorized(new ResponseAPI(401, "No refresh token found"));
 
             var result = await _authService.RefreshTokenAsync(refreshToken);
-
-            if (string.IsNullOrEmpty(result.AccessToken) ||
-                result.AccessToken.StartsWith("Invalid", StringComparison.Ordinal) ||
-                result.AccessToken.StartsWith("Refresh token expired", StringComparison.Ordinal))
-                return Unauthorized(new ResponseAPI(401, result.AccessToken ?? "Invalid refresh token"));
-
             SetTokenCookies(result.AccessToken, result.RefreshToken);
 
             return Ok(new ResponseAPI(200, "Token refreshed successfully"));

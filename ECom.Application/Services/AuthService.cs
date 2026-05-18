@@ -3,6 +3,7 @@ using ECom.Application.Email;
 using ECom.Application.Interfaces.Persistence;
 using ECom.Application.Interfaces.Services;
 using ECom.Core.Entities;
+using ECom.Application.Common.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,10 +40,10 @@ namespace ECom.Application.Services
             if (registerDto == null) return null!;
 
             if (await _userManager.FindByNameAsync(registerDto.UserName) is not null)
-                return "This Username already Registered";
+                throw new BusinessException("This Username already Registered", 400);
 
             if (await _userManager.FindByEmailAsync(registerDto.Email) is not null)
-                return "This Email already Registered";
+                throw new BusinessException("This Email already Registered", 400);
 
             AppUser user = new()
             {
@@ -53,7 +54,7 @@ namespace ECom.Application.Services
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded)
-                return result.Errors.First().Description;
+                throw new BusinessException(result.Errors.First().Description, 400);
 
             // Ensure valid role selection (Prevent users from registering as Admin)
             var roleToAssign = string.Equals(registerDto.Role, "Vendor", StringComparison.OrdinalIgnoreCase) 
@@ -74,27 +75,21 @@ namespace ECom.Application.Services
 
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user is null)
-                return new AuthResponseDto { AccessToken = "Email or Password is incorrect" };
+                throw new BusinessException("Email or Password is incorrect", 401);
 
             if (user.IsBlocked)
-                return new AuthResponseDto
-                {
-                    AccessToken = $"Your account has been blocked. Reason: {user.BlockReason ?? "Violation of terms"}"
-                };
+                throw new BusinessException($"Your account has been blocked. Reason: {user.BlockReason ?? "Violation of terms"}", 403);
 
             if (!user.EmailConfirmed)
             {
                 string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await SendActivationEmail(user.Email!, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");
-                return new AuthResponseDto
-                {
-                    AccessToken = "Please Active your Email, We have sent you an email to active your account"
-                };
+                throw new BusinessException("Please Active your Email, We have sent you an email to active your account", 400);
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
             if (!result.Succeeded)
-                return new AuthResponseDto { AccessToken = "Please Check your E-mail or Password, Something went wrong" };
+                throw new BusinessException("Email or Password is incorrect", 401);
 
             var accessToken = await _generateToken.GetAndGenerateToken(user);
             var refreshToken = _generateToken.GenerateRefreshToken();
@@ -115,10 +110,10 @@ namespace ECom.Application.Services
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
             if (user is null)
-                return new AuthResponseDto { AccessToken = "Invalid refresh token" };
+                throw new BusinessException("Invalid refresh token", 401);
 
             if (user.RefreshTokenExpiryTime < DateTime.UtcNow)
-                return new AuthResponseDto { AccessToken = "Refresh token expired — please login again" };
+                throw new BusinessException("Refresh token expired — please login again", 401);
 
             var newAccessToken = await _generateToken.GetAndGenerateToken(user);
             var newRefreshToken = _generateToken.GenerateRefreshToken();

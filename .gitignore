@@ -361,3 +361,30 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Custom: temp log files, build scratch folders, and IDE-generated output
+*.log
+*.txt
+build.log
+build_error.log
+build_log.txt
+build_logs.txt
+build_output.txt
+temp_build*/
+temp_build/
+temp_build2/
+temp_build3/
+
+# EF Core Migrations snapshot conflicts (keep migration files but ignore tool output)
+# Uncomment the next line if you want to ignore all migrations:
+# **/Migrations/
+
+# User secrets (never commit)
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/secrets.json
+
+# Rider / JetBrains IDE
+.idea/
+*.DotSettings
+*.DotSettings.user

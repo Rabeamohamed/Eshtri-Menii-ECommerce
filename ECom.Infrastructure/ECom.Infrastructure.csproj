@@ -31,11 +31,15 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.2" />
-    <PackageReference Include="MimeKit" Version="4.15.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="MimeKit" Version="4.16.0" />
     <PackageReference Include="QuestPDF" Version="2026.5.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.10.14" />
     <PackageReference Include="Stripe.net" Version="50.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
+    <PackageReference Include="System.Security.AccessControl" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
