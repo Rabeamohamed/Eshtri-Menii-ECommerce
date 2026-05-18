@@ -144,5 +144,79 @@ namespace ECom.Infrastructure.Repositories
         {
             return await _context.Users.CountAsync();
         }
+
+        // Seller Specific Implementations
+        public async Task<IReadOnlyList<BestSellingProductDto>> GetSellerBestSellingProductsAsync(string sellerId, int count)
+        {
+            return await _context.OrderItems
+                .Include(oi => oi.Order)
+                .Where(oi => oi.SellerId == sellerId && oi.Order.Status == PaymentStatus.PaymentReceived)
+                .GroupBy(oi => new { oi.ProductItemId, oi.ProductName })
+                .Select(g => new BestSellingProductDto
+                {
+                    ProductId = g.Key.ProductItemId,
+                    ProductName = g.Key.ProductName,
+                    TotalSold = g.Sum(oi => oi.Quantity),
+                    TotalRevenue = g.Sum(oi => oi.Price * oi.Quantity)
+                })
+                .OrderByDescending(p => p.TotalSold)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<OrderStatsDto> GetSellerOrderStatsAsync(string sellerId)
+        {
+            var sellerItems = _context.OrderItems
+                .Include(oi => oi.Order)
+                .Where(oi => oi.SellerId == sellerId);
+
+            // Total orders that contain at least one item from this seller
+            var totalOrders = await sellerItems.Select(oi => oi.OrderId).Distinct().CountAsync();
+            var pendingOrders = await sellerItems.Where(oi => oi.Order.Status == PaymentStatus.Pending).Select(oi => oi.OrderId).Distinct().CountAsync();
+            var completedOrders = await sellerItems.Where(oi => oi.Order.Status == PaymentStatus.PaymentReceived).Select(oi => oi.OrderId).Distinct().CountAsync();
+
+            return new OrderStatsDto
+            {
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
+                CompletedOrders = completedOrders
+            };
+        }
+
+        public async Task<RevenueDto> GetSellerRevenueAsync(string sellerId)
+        {
+            var paidItems = _context.OrderItems
+                .Include(oi => oi.Order)
+                .Where(oi => oi.SellerId == sellerId && oi.Order.Status == PaymentStatus.PaymentReceived);
+
+            var totalRevenue = await paidItems.SumAsync(oi => oi.Price * oi.Quantity);
+
+            var thisMonth = DateTime.Now.Month;
+            var thisYear = DateTime.Now.Year;
+
+            var monthlyRevenue = await paidItems
+                .Where(oi => oi.Order.OrderDate.Month == thisMonth && oi.Order.OrderDate.Year == thisYear)
+                .SumAsync(oi => oi.Price * oi.Quantity);
+
+            return new RevenueDto
+            {
+                TotalRevenue = totalRevenue,
+                MonthlyRevenue = monthlyRevenue
+            };
+        }
+
+        public async Task<IReadOnlyList<BestSellingProductDto>> GetSellerOutOfStockProductsAsync(string sellerId)
+        {
+            return await _context.Products
+                .Where(p => p.SellerId == sellerId && p.StockQuantity <= 0)
+                .Select(p => new BestSellingProductDto
+                {
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    TotalSold = 0,
+                    TotalRevenue = 0
+                })
+                .ToListAsync();
+        }
     }
 }

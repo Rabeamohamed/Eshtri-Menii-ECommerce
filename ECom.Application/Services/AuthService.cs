@@ -55,7 +55,12 @@ namespace ECom.Application.Services
             if (!result.Succeeded)
                 return result.Errors.First().Description;
 
-            await _userManager.AddToRoleAsync(user, "Customer");
+            // Ensure valid role selection (Prevent users from registering as Admin)
+            var roleToAssign = string.Equals(registerDto.Role, "Vendor", StringComparison.OrdinalIgnoreCase) 
+                ? "Vendor" 
+                : "Customer";
+
+            await _userManager.AddToRoleAsync(user, roleToAssign);
 
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await SendActivationEmail(user.Email!, token, "Active", "Active Email", "Please Active your Email, Click on button to Active");

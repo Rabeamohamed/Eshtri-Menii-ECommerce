@@ -62,6 +62,17 @@ namespace ECom.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IReadOnlyList<Orders>> GetOrdersForSellerAsync(string sellerId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.DeliveryMethod)
+                .Where(o => o.OrderItems.Any(i => i.SellerId == sellerId))
+                .AsNoTracking()
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
         public async Task<Dictionary<string, int>> GetOrdersCountByStatusAsync()
         {
             var counts = await _context.Orders

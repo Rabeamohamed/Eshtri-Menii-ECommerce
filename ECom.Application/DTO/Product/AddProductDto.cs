@@ -11,5 +11,6 @@ namespace ECom.Application.DTO.Product
         public int CategoryId { get; init; }
         public IFormFileCollection Photo { get; init; }
         public int StockQuantity { get; init; }
+        public string? SellerId { get; set; }
     }
 }

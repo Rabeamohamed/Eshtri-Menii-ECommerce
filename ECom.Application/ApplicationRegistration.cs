@@ -19,6 +19,9 @@ namespace ECom.Application
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IWishlistService, WishlistService>();
+            services.AddScoped<ISellerProductService, SellerProductService>();
+            services.AddScoped<ISellerOrderService, SellerOrderService>();
+            services.AddScoped<ISellerAnalyticsService, SellerAnalyticsService>();
             
             // Admin Services
             services.AddScoped<IAdminCategoryService, AdminCategoryService>();

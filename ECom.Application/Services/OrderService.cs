@@ -75,7 +75,7 @@ namespace ECom.Application.Services
                 return new OrderItems(
                     product.Id, item.Image,
                     product.Name, item.Price,
-                    item.Quantity);
+                    item.Quantity, product.SellerId);
             }).ToList();
 
             var deliveryMethod = await _unitOfWork.DeliveryMethodRepository

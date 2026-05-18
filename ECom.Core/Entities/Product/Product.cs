@@ -1,4 +1,4 @@
-﻿
+
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECom.Core.Entities.Product
@@ -23,5 +23,7 @@ namespace ECom.Core.Entities.Product
         public int StockQuantity { get; set; } = 0;
         public bool InStock => StockQuantity > 0;
 
+        // Multi-Vendor Support
+        public string? SellerId { get; set; }
     }
 }

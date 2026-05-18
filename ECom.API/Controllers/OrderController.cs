@@ -8,7 +8,8 @@ using System.Security.Claims;
 
 namespace ECom.API.Controllers
 {
-    [Authorize]
+    // Customer-only order operations. Only users with the 'Customer' role can create/view orders.
+    [Authorize(Roles = "Customer")]
     public class OrderController : BaseController
     {
         private readonly IOrderService _orderService;
@@ -76,25 +77,6 @@ namespace ECom.API.Controllers
                 return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
 
             var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: false);
-
-            return result.StatusCode switch
-            {
-                200 => Ok(result),
-                404 => NotFound(result),
-                403 => StatusCode(403, result),
-                _ => BadRequest(result)
-            };
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPut("admin-cancel/{orderId}")]
-        public async Task<IActionResult> AdminCancelOrder(int orderId)
-        {
-            var email = BuyerEmail;
-            if (string.IsNullOrWhiteSpace(email))
-                return Unauthorized(new ResponseAPI(401, "Authenticated user email is required."));
-
-            var result = await _orderService.CancelOrderAsync(orderId, email, isAdmin: true);
 
             return result.StatusCode switch
             {

@@ -25,32 +25,27 @@ namespace ECom.Application.Services.Admin
 
         public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
         {
-            var revenueTask = GetRevenueAsync();
-            var orderStatsTask = GetOrderStatsAsync();
-            var bestSellingTask = GetBestSellingProductsAsync(5);
-            var topCustomersTask = GetTopCustomersAsync(5);
-            var categorySalesTask = GetCategorySalesAsync();
-            var totalProductsTask = _unitOfWork.ProductRepository.CountAsync();
-            var outOfStockTask = GetOutOfStockProductsAsync();
-            var totalCategoriesTask = _unitOfWork.CategoryRepository.CountAsync();
-            var totalUsersTask = _unitOfWork.AnalyticsRepository.GetUserCountAsync();
-
-            await Task.WhenAll(
-                revenueTask, orderStatsTask, bestSellingTask,
-                topCustomersTask, categorySalesTask, totalProductsTask,
-                outOfStockTask, totalCategoriesTask, totalUsersTask);
+            var revenue = await GetRevenueAsync();
+            var orderStats = await GetOrderStatsAsync();
+            var bestSelling = await GetBestSellingProductsAsync(5);
+            var topCustomers = await GetTopCustomersAsync(5);
+            var categorySales = await GetCategorySalesAsync();
+            var totalProducts = await _unitOfWork.ProductRepository.CountAsync();
+            var outOfStock = await GetOutOfStockProductsAsync();
+            var totalCategories = await _unitOfWork.CategoryRepository.CountAsync();
+            var totalUsers = await _unitOfWork.AnalyticsRepository.GetUserCountAsync();
 
             return new DashboardSummaryDto
             {
-                Revenue = await revenueTask,
-                OrderStats = await orderStatsTask,
-                TotalProducts = await totalProductsTask,
-                OutOfStockProducts = (await outOfStockTask).Count,
-                TotalUsers = await totalUsersTask,
-                TotalCategories = await totalCategoriesTask,
-                BestSellingProducts = await bestSellingTask,
-                TopCustomers = await topCustomersTask,
-                CategorySales = await categorySalesTask
+                Revenue = revenue,
+                OrderStats = orderStats,
+                TotalProducts = totalProducts,
+                OutOfStockProducts = outOfStock.Count,
+                TotalUsers = totalUsers,
+                TotalCategories = totalCategories,
+                BestSellingProducts = bestSelling,
+                TopCustomers = topCustomers,
+                CategorySales = categorySales
             };
         }
 

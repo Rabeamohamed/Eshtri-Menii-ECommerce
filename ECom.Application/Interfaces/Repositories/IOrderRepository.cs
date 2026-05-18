@@ -8,6 +8,7 @@ namespace ECom.Application.Interfaces.Repositories
         Task<IReadOnlyList<Orders>> GetOrdersByEmailAsync(string buyerEmail);
         Task<Orders> GetOrderByIdAsync(int id, string buyerEmail = null);
         Task<IReadOnlyList<Orders>> GetAllOrdersAsync(PaymentStatus? status = null);
+        Task<IReadOnlyList<Orders>> GetOrdersForSellerAsync(string sellerId);
         Task<Dictionary<string, int>> GetOrdersCountByStatusAsync();
         Task AddOrderAsync(Orders order);
         Task UpdateOrderAsync(Orders order);

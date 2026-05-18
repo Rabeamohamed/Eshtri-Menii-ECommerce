@@ -29,6 +29,19 @@ namespace ECom.Infrastructure
         public static IServiceCollection InfrastructureConfiguration(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            
+            // Register specific repositories
+            service.AddScoped<ICategoryRepository, CategoryRepository>();
+            service.AddScoped<IProductRepository, ProductRepository>();
+            service.AddScoped<IPhotoRepository, PhotoRepository>();
+            service.AddScoped<ICustomerBasketRepository, CustomerBasketRepository>();
+            service.AddScoped<IReviewRepository, ReviewRepository>();
+            service.AddScoped<IWishlistRepository, WishlistRepository>();
+            service.AddScoped<IOrderRepository, OrderRepository>();
+            service.AddScoped<IDeliveryMethodRepository, DeliveryMethodRepository>();
+            service.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+            service.AddScoped<ICouponRepository, CouponRepository>();
+
             service.AddHttpContextAccessor();
 
             // Applying Unit of Work Pattern

@@ -29,6 +29,11 @@ namespace ECom.Infrastructure.Repositories
             return await query.CountAsync();
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await context.Products.AsNoTracking().CountAsync();
+        }
+
         public async Task<IEnumerable<ProductDto>> GetAllAsync(ProductParams productParams)
         {
             var query = context.Products
@@ -62,6 +67,9 @@ namespace ECom.Infrastructure.Repositories
             if (productParams.CategoryId.HasValue)
                 query = query.Where(p => p.CategoryId == productParams.CategoryId.Value);
 
+            if (!string.IsNullOrWhiteSpace(productParams.SellerId))
+                query = query.Where(p => p.SellerId == productParams.SellerId);
+
             return query;
         }
 
@@ -70,9 +78,9 @@ namespace ECom.Infrastructure.Repositories
             var key = (sort ?? "").Trim();
             return key switch
             {
-                "priceAsc" or "PriceAsc" => query.OrderBy(p => p.NewPrice),
-                "priceDesc" or "PriceDesc" => query.OrderByDescending(p => p.NewPrice),
-                "nameDesc" or "NameDesc" => query.OrderByDescending(p => p.Name),
+                "PriceAce" or "priceAsc" or "PriceAsc" => query.OrderBy(p => p.NewPrice),
+                "PriceDce" or "priceDesc" or "PriceDesc" => query.OrderByDescending(p => p.NewPrice),
+                "NameDce" or "nameDesc" or "NameDesc" => query.OrderByDescending(p => p.Name),
                 "nameAsc" or "NameAsc" => query.OrderBy(p => p.Name),
                 _ => query.OrderBy(p => p.Name),
             };
@@ -169,6 +177,12 @@ namespace ECom.Infrastructure.Repositories
 
             context.Remove(product);
             await context.SaveChangesAsync();
+        }
+
+        public Task<bool> UpdateAsync(Product product)
+        {
+            context.Products.Update(product);
+            return Task.FromResult(true);
         }
     }
 }

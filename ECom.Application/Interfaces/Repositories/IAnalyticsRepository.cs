@@ -11,5 +11,11 @@ namespace ECom.Application.Interfaces.Repositories
         Task<IReadOnlyList<TopCustomerDto>> GetTopCustomersAsync(int count);
         Task<IReadOnlyList<BestSellingProductDto>> GetOutOfStockProductsAsync();
         Task<int> GetUserCountAsync();
+
+        // Seller specific methods
+        Task<IReadOnlyList<BestSellingProductDto>> GetSellerBestSellingProductsAsync(string sellerId, int count);
+        Task<OrderStatsDto> GetSellerOrderStatsAsync(string sellerId);
+        Task<RevenueDto> GetSellerRevenueAsync(string sellerId);
+        Task<IReadOnlyList<BestSellingProductDto>> GetSellerOutOfStockProductsAsync(string sellerId);
     }
 }
