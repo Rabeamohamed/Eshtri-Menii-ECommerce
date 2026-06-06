@@ -9,8 +9,8 @@ namespace ECom.Application.Email
             baseUrl = baseUrl.TrimEnd('/');
 
             string actionLink = component == "Reset-Password"
-                ? $"http://localhost:4200/reset-password?email={email}&token={encodedToken}"
-                : $"http://localhost:4200/activate-email?email={email}&code={encodedToken}";
+                ? $"http://localhost:4200/auth/reset?email={email}&token={encodedToken}"
+                : $"http://localhost:4200/auth/activate?email={email}&token={encodedToken}";
 
             string title = component == "Reset-Password"
                 ? "Password Reset Request"

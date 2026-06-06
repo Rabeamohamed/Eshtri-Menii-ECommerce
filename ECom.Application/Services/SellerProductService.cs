@@ -24,11 +24,21 @@ namespace ECom.Application.Services
             if (dto.CategoryId <= 0)
                 return new ResponseAPI(400, "A valid category is required");
 
+            if (string.IsNullOrWhiteSpace(sellerId))
+                return new ResponseAPI(401, "Unauthorized: Seller ID missing");
             dto.SellerId = sellerId; // Force the seller ID to the current user
-            var ok = await _unitOfWork.ProductRepository.AddAsync(dto);
-            return ok
-                ? new ResponseAPI(201, "Product created successfully")
-                : new ResponseAPI(400, "Failed to create product");
+            try
+            {
+                var ok = await _unitOfWork.ProductRepository.AddAsync(dto);
+                return ok
+                    ? new ResponseAPI(201, "Product created successfully")
+                    : new ResponseAPI(400, "Failed to create product");
+            }
+            catch (Exception ex)
+            {
+                // Log exception if logging available
+                return new ResponseAPI(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         public async Task<ResponseAPI> DeleteMyProductAsync(string sellerId, int id)

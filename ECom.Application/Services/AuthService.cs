@@ -49,7 +49,8 @@ namespace ECom.Application.Services
             {
                 Email = registerDto.Email,
                 UserName = registerDto.UserName,
-                DisplayName = registerDto.DisplayName
+                DisplayName = registerDto.DisplayName,
+                //EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -158,6 +159,10 @@ namespace ECom.Application.Services
             if (user is null) return "Invalid Email";
 
             var decodedToken = Uri.UnescapeDataString(resetPasswordDto.Token);
+            if (decodedToken.Contains(" "))
+            {
+                decodedToken = decodedToken.Replace(" ", "+");
+            }
 
             var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.Password);
             if (result.Succeeded)
@@ -174,7 +179,13 @@ namespace ECom.Application.Services
             if (await _userManager.IsEmailConfirmedAsync(user))
                 return "User Already Active";
 
-            var result = await _userManager.ConfirmEmailAsync(user, activeEmailDto.Token);
+            var decodedToken = activeEmailDto.Token;
+            if (decodedToken.Contains(" "))
+            {
+                decodedToken = decodedToken.Replace(" ", "+");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             if (result.Succeeded)
                 return "User Active Successfully";
 
@@ -214,7 +225,15 @@ namespace ECom.Application.Services
                 "rabea2mohamed@gmail.com",
                 subject,
                 EmailStringBody.Send(email, code, component, message, baseUrl));
-            await _emailService.SendEmailAsync(dto);
+            try
+            {
+                await _emailService.SendEmailAsync(dto);
+            }
+            catch (Exception ex)
+            {
+                // In local development, we catch email failures so offline scenarios don't crash auth flows.
+                Console.WriteLine($"Warning: Failed to send activation email to {email}: {ex.Message}");
+            }
         }
     }
 }

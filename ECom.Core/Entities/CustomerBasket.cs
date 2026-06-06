@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,7 @@ namespace ECom.Core.Entities
         public string? ClientSecret { get; set; }
 
         // Coupon support
-        public string CouponCode { get; set; }        // applied coupon code
+        public string? CouponCode { get; set; }        // applied coupon code
         public decimal DiscountAmount { get; set; }    // calculated discount
         public List<BasketItem> BasketItems { get; set; } = new List<BasketItem>();  // Value
     }

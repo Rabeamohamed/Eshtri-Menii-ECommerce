@@ -9,7 +9,7 @@ namespace ECom.Application.DTO.Product
         public decimal OldPrice { get; init; }
         public decimal NewPrice { get; init; }
         public int CategoryId { get; init; }
-        public IFormFileCollection Photo { get; init; }
+        public IFormFileCollection? Photo { get; init; }
         public int StockQuantity { get; init; }
         public string? SellerId { get; set; }
     }

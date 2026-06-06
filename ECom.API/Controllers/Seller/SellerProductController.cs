@@ -17,7 +17,8 @@ namespace ECom.API.Controllers.Seller
 
         private string GetSellerId()
         {
-            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            var sellerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return sellerId ?? string.Empty;
         }
 
         [HttpGet("get-all")]
@@ -46,6 +47,15 @@ namespace ECom.API.Controllers.Seller
         [HttpPost("create")]
         public async Task<IActionResult> CreateMyProduct([FromForm] AddProductDto dto)
         {
+            // Validate incoming form data
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new ResponseAPI(400, "Invalid product data: " + string.Join(", ", errors)));
+            }
+
             var sellerId = GetSellerId();
             var result = await _productService.CreateMyProductAsync(sellerId, dto);
             return result.StatusCode switch

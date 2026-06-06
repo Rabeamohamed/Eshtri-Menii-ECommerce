@@ -42,10 +42,8 @@ namespace ECom.Application.Services
             if (string.IsNullOrWhiteSpace(id))
                 return new ResponseAPI(400, "Basket id is required");
 
-            var deleted = await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(id);
-            return deleted
-                ? new ResponseAPI(200, "Basket deleted successfully")
-                : new ResponseAPI(400, "Failed to delete basket");
+            await _unitOfWork.CustomerBasketRepository.DeleteBasketAsync(id);
+            return new ResponseAPI(200, "Basket deleted successfully");
         }
     }
 }

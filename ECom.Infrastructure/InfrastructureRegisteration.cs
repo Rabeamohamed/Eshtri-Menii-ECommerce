@@ -123,14 +123,25 @@ namespace ECom.Infrastructure
                      ValidateAudience = false,
                      ClockSkew = TimeSpan.Zero
                  };
+
                  op.Events = new JwtBearerEvents()
                  {
                      OnMessageReceived = context =>
                      {
-                         var token = context.Request.Cookies["token"];
-                         if (!string.IsNullOrEmpty(token))
+                         // SignalR — token في الـ query string
+                         var accessToken = context.Request.Query["access_token"];
+                         var path = context.HttpContext.Request.Path;
+                         if (!string.IsNullOrEmpty(accessToken) &&
+                             path.StartsWithSegments("/hub/notifications"))
                          {
-                             context.Token = token;
+                             context.Token = accessToken;
+                         }
+                         // REST API — token في الـ Cookie
+                         else
+                         {
+                             var token = context.Request.Cookies["token"];
+                             if (!string.IsNullOrEmpty(token))
+                                 context.Token = token;
                          }
                          return Task.CompletedTask;
                      }

@@ -17,10 +17,7 @@ namespace ECom.API.Controllers
         private readonly IMapper _mapper;
         private readonly IOptionsMonitor<CookieAuthOptions> _cookieOptions;
 
-        public AccountController(
-            IAuthService authService,
-            IMapper mapper,
-            IOptionsMonitor<CookieAuthOptions> cookieOptions)
+        public AccountController(IAuthService authService, IMapper mapper, IOptionsMonitor<CookieAuthOptions> cookieOptions)
         {
             _authService = authService;
             _mapper = mapper;
@@ -140,6 +137,7 @@ namespace ECom.API.Controllers
                 HttpOnly = true,
                 IsEssential = true,
                 SameSite = sameSite
+                //SameSite = SameSiteMode.None
             };
 
             if (!string.IsNullOrWhiteSpace(opt.Domain))
@@ -156,6 +154,16 @@ namespace ECom.API.Controllers
             {
                 Expires = DateTimeOffset.UtcNow.AddDays(opt.RefreshTokenDays)
             });
+        }
+
+        [Authorize]
+        [HttpGet("signalr-token")]
+        public IActionResult GetSignalRToken()
+        {
+            var token = Request.Cookies["token"];
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized();
+            return Ok(new { token });
         }
     }
 }
