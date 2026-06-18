@@ -21,9 +21,9 @@ namespace ECom.Infrastructure.Service
         {
             _context = context;
             _userManager = userManager;
-            // ✅ Required for EPPlus
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            // ✅ Required for QuestPDF
+            // Required for EPPlus
+            ExcelPackage.License.SetNonCommercialPersonal("Rabie Mohamed");
+            // Required for QuestPDF
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
@@ -42,14 +42,14 @@ namespace ECom.Infrastructure.Service
             using var package = new ExcelPackage();
             var sheet = package.Workbook.Worksheets.Add("Sales Report");
 
-            // ✅ Title
+            // Title
             sheet.Cells["A1:G1"].Merge = true;
             sheet.Cells["A1"].Value = $"Sales Report ({from:dd/MM/yyyy} - {to:dd/MM/yyyy})";
             sheet.Cells["A1"].Style.Font.Bold = true;
             sheet.Cells["A1"].Style.Font.Size = 16;
             sheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-            // ✅ Summary row
+            // Summary row
             sheet.Cells["A2"].Value = "Total Orders:";
             sheet.Cells["B2"].Value = orders.Count;
             sheet.Cells["A3"].Value = "Total Revenue:";
@@ -58,7 +58,7 @@ namespace ECom.Infrastructure.Service
                 .Sum(o => o.SubTotal);
             sheet.Cells["B3"].Style.Numberformat.Format = "$#,##0.00";
 
-            // ✅ Headers
+            //  Headers
             var headers = new[]
             {
                 "Order ID", "Buyer Email", "Order Date",
@@ -75,7 +75,7 @@ namespace ECom.Infrastructure.Service
                 sheet.Cells[5, i + 1].Style.Font.Color.SetColor(System.Drawing.Color.White);
             }
 
-            // ✅ Data rows
+            // Data rows
             int row = 6;
             foreach (var order in orders)
             {
@@ -114,14 +114,14 @@ namespace ECom.Infrastructure.Service
             using var package = new ExcelPackage();
             var sheet = package.Workbook.Worksheets.Add("Products Report");
 
-            // ✅ Title
+            // Title
             sheet.Cells["A1:H1"].Merge = true;
             sheet.Cells["A1"].Value = $"Products Report - {DateTime.UtcNow:dd/MM/yyyy}";
             sheet.Cells["A1"].Style.Font.Bold = true;
             sheet.Cells["A1"].Style.Font.Size = 16;
             sheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-            // ✅ Headers
+            // Headers
             var headers = new[]
             {
                 "ID", "Name", "Category", "Old Price",
@@ -138,7 +138,7 @@ namespace ECom.Infrastructure.Service
                 sheet.Cells[3, i + 1].Style.Font.Color.SetColor(System.Drawing.Color.White);
             }
 
-            // ✅ Data rows
+            // Data rows
             int row = 4;
             foreach (var product in products)
             {
@@ -153,7 +153,7 @@ namespace ECom.Infrastructure.Service
                 sheet.Cells[row, 7].Value = product.TotalReviews;
                 sheet.Cells[row, 8].Value = product.AverageRating;
 
-                // ✅ Highlight out of stock in red
+                // Highlight out of stock in red
                 if (product.StockQuantity == 0)
                 {
                     sheet.Cells[row, 6].Style.Font.Color.SetColor(System.Drawing.Color.Red);
@@ -174,20 +174,20 @@ namespace ECom.Infrastructure.Service
             using var package = new ExcelPackage();
             var sheet = package.Workbook.Worksheets.Add("Users Report");
 
-            // ✅ Title
+            // Title
             sheet.Cells["A1:F1"].Merge = true;
             sheet.Cells["A1"].Value = $"Users Report - {DateTime.UtcNow:dd/MM/yyyy}";
             sheet.Cells["A1"].Style.Font.Bold = true;
             sheet.Cells["A1"].Style.Font.Size = 16;
             sheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-            // ✅ Summary
+            // Summary
             sheet.Cells["A2"].Value = "Total Users:";
             sheet.Cells["B2"].Value = users.Count;
             sheet.Cells["A3"].Value = "Blocked Users:";
             sheet.Cells["B3"].Value = users.Count(u => u.IsBlocked);
 
-            // ✅ Headers
+            // Headers
             var headers = new[]
             {
                 "ID", "Username", "Email",
@@ -204,7 +204,7 @@ namespace ECom.Infrastructure.Service
                 sheet.Cells[5, i + 1].Style.Font.Color.SetColor(System.Drawing.Color.White);
             }
 
-            // ✅ Data rows
+            // Data rows
             int row = 6;
             foreach (var user in users)
             {
@@ -215,7 +215,7 @@ namespace ECom.Infrastructure.Service
                 sheet.Cells[row, 5].Value = user.EmailConfirmed ? "✅" : "❌";
                 sheet.Cells[row, 6].Value = user.IsBlocked ? "Blocked" : "Active";
 
-                // ✅ Highlight blocked users
+                // Highlight blocked users
                 if (user.IsBlocked)
                 {
                     sheet.Cells[row, 6].Style.Font.Color.SetColor(System.Drawing.Color.Red);
@@ -230,7 +230,7 @@ namespace ECom.Infrastructure.Service
         }
 
         // =====================================
-        // ✅ PDF REPORTS
+        // PDF REPORTS
         // =====================================
 
         public async Task<byte[]> ExportSalesReportPdfAsync(DateTime from, DateTime to)
