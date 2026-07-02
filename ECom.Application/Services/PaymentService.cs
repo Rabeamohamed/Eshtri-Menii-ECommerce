@@ -17,12 +17,7 @@ namespace ECom.Application.Services
         private readonly IStripePaymentGateway _stripePaymentGateway;
         private readonly ILogger<PaymentService> _logger;
 
-        public PaymentService(
-            IUnitOfWork unitOfWork,
-            INotificationService notificationService,
-            UserManager<AppUser> userManager,
-            IStripePaymentGateway stripePaymentGateway,
-            ILogger<PaymentService> logger)
+        public PaymentService(IUnitOfWork unitOfWork, INotificationService notificationService, UserManager<AppUser> userManager, IStripePaymentGateway stripePaymentGateway, ILogger<PaymentService> logger)
         {
             _unitOfWork = unitOfWork;
             _notificationService = notificationService;
@@ -68,32 +63,51 @@ namespace ECom.Application.Services
                     new[] { "card" });
                 basket.PaymentIntentId = id;
                 basket.ClientSecret = secret;
+
+                _logger.LogInformation("💳 Created new PaymentIntent {PaymentIntentId} for basket {BasketId}", id, basketId);
             }
             else
             {
                 await _stripePaymentGateway.UpdatePaymentIntentAmountAsync(basket.PaymentIntentId, amountCents);
+
+                _logger.LogInformation("💳 Updated existing PaymentIntent {PaymentIntentId} for basket {BasketId}", basket.PaymentIntentId, basketId);
             }
 
             await _unitOfWork.CustomerBasketRepository.UpdateBasketAsync(basket);
             return basket;
         }
 
-        public Task<bool> RefundPaymentAsync(string paymentIntentId) =>
-            _stripePaymentGateway.RefundPaymentIntentAsync(paymentIntentId);
+        public Task<bool> RefundPaymentAsync(string paymentIntentId) => _stripePaymentGateway.RefundPaymentIntentAsync(paymentIntentId);
 
         public async Task UpdateOrderPaymentStatusAsync(string paymentIntentId, PaymentStatus status)
         {
-            var order = await _unitOfWork.OrderRepository
-                .GetOrderByPaymentIntentIdAsync(paymentIntentId);
+            _logger.LogInformation("🔔 Webhook received for PaymentIntentId: {PaymentIntentId}, Status: {Status}", paymentIntentId, status);
 
-            if (order is null) return;
+            var order = await _unitOfWork.OrderRepository.GetOrderByPaymentIntentIdAsync(paymentIntentId);
+
+            if (order is null)
+            {
+                _logger.LogWarning("⚠️ No order found for PaymentIntentId: {PaymentIntentId}, Status: {Status}. The order may not have been created yet.", paymentIntentId, status);
+                return;
+            }
+
+            _logger.LogInformation("✅ Found order {OrderId} for PaymentIntentId: {PaymentIntentId}. Current status: {CurrentStatus}, New status: {NewStatus}",
+                order.Id, paymentIntentId, order.Status, status);
 
             if (order.Status == status)
+            {
+                _logger.LogInformation("ℹ️ Order {OrderId} already has status {Status}, skipping update", order.Id, status);
                 return;
+            }
 
             order.Status = status;
             await _unitOfWork.OrderRepository.UpdateOrderAsync(order);
             await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("✅ Order {OrderId} status updated to {Status} successfully", order.Id, status);
+
+            // ℹ️ ملاحظة: مسح الـ Basket بيتم من الـ Frontend بعد نجاح confirmPayment()
+            // مش من هنا، لأن الـ Repository الحالي ما فيهوش GetBasketByPaymentIntentIdAsync
 
             try
             {
@@ -110,10 +124,7 @@ namespace ECom.Application.Services
                     if (!string.IsNullOrEmpty(title))
                     {
                         await _notificationService.SendToUserAsync(
-                            user.Id,
-                            title,
-                            message,
-                            status == PaymentStatus.PaymentReceived ? NotificationType.PaymentReceived : NotificationType.PaymentFailed
+                            user.Id, title, message, status == PaymentStatus.PaymentReceived ? NotificationType.PaymentReceived : NotificationType.PaymentFailed
                         );
                     }
                 }

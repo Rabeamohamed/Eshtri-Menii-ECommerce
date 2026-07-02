@@ -21,13 +21,7 @@ namespace ECom.Application.Services
         private readonly ICouponService _couponService;
         private readonly UserManager<AppUser> _userManager;
 
-        public OrderService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IPaymentService paymentService,
-            INotificationService notificationService,
-            ICouponService couponService,
-            UserManager<AppUser> userManager)
+        public OrderService(IUnitOfWork unitOfWork,IMapper mapper,IPaymentService paymentService,INotificationService notificationService,ICouponService couponService,UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -51,6 +45,18 @@ namespace ECom.Application.Services
 
             if (basket is null)
                 throw new NotFoundException("Basket not found");
+
+           
+            if (!string.IsNullOrEmpty(basket.PaymentIntentId))
+            {
+                var existOrder = await _unitOfWork.OrderRepository
+                    .GetOrderByPaymentIntentIdAsync(basket.PaymentIntentId);
+
+                if (existOrder is not null)
+                {
+                    return existOrder;
+                }
+            }
 
             var products = new Dictionary<int, Product>();
             foreach (var item in basket.BasketItems)
@@ -99,31 +105,6 @@ namespace ECom.Application.Services
 
             var shippingAddress = _mapper.Map<ShippingAddress>(orderDto.ShippingAddress);
 
-            var existOrder = await _unitOfWork.OrderRepository
-                .GetOrderByPaymentIntentIdAsync(basket.PaymentIntentId);
-
-            if (existOrder is not null)
-            {
-                await _unitOfWork.ExecuteInTransactionAsync(async () =>
-                {
-                    foreach (var item in existOrder.OrderItems)
-                    {
-                        var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductItemId);
-                        if (product is not null)
-                        {
-                            product.StockQuantity += item.Quantity;
-                            await _unitOfWork.ProductRepository.UpdateAsync(product);
-                        }
-                    }
-
-                    await _unitOfWork.OrderRepository.DeleteOrderAsync(existOrder);
-                    await _unitOfWork.SaveChangesAsync();
-                });
-
-                await _paymentService.CreateOrUpdatePaymentAsync(
-                    basket.Id, deliveryMethod.Id);
-            }
-
             Orders order = null!;
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -148,9 +129,6 @@ namespace ECom.Application.Services
                     await _couponService.IncrementCouponUsageAsync(basket.CouponCode);
                 }
             });
-
-            await _unitOfWork.CustomerBasketRepository
-                .DeleteBasketAsync(orderDto.BasketId);
 
             try
             {
@@ -220,8 +198,7 @@ namespace ECom.Application.Services
 
             if (wasPaid)
             {
-                var refundSuccess = await _paymentService
-                    .RefundPaymentAsync(order.PaymentIntentId);
+                var refundSuccess = await _paymentService.RefundPaymentAsync(order.PaymentIntentId);
                 if (!refundSuccess)
                     return new ResponseAPI(400, "Failed to process refund");
             }
