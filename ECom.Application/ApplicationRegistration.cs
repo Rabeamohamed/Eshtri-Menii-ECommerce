@@ -22,7 +22,7 @@ namespace ECom.Application
             services.AddScoped<ISellerProductService, SellerProductService>();
             services.AddScoped<ISellerOrderService, SellerOrderService>();
             services.AddScoped<ISellerAnalyticsService, SellerAnalyticsService>();
-            
+
             // Admin Services
             services.AddScoped<IAdminCategoryService, AdminCategoryService>();
             services.AddScoped<IAdminProductService, AdminProductService>();

@@ -6,12 +6,12 @@ using ECom.Core.Entities.Order;
 
 namespace ECom.Application.Mapping
 {
-    public class OrderMapping :Profile
+    public class OrderMapping : Profile
     {
         public OrderMapping()
         {
-            CreateMap<Orders,OrderToReturnDto>()
-                .ForMember(d => d.DeliveryMethod,  
+            CreateMap<Orders, OrderToReturnDto>()
+                .ForMember(d => d.DeliveryMethod,
                 o => o.MapFrom(s => s.DeliveryMethod.Name))
                 .ForMember(d => d.Total,
                     o => o.MapFrom(s => s.GetTotal()))
@@ -19,9 +19,9 @@ namespace ECom.Application.Mapping
                     o => o.MapFrom(s => s.Status.ToString()))
                 .ReverseMap();
 
-            CreateMap<OrderItems,OrderItemsDto>().ReverseMap();
-            CreateMap<ShippingAddress,ShippingAddressDto>().ReverseMap();
+            CreateMap<OrderItems, OrderItemsDto>().ReverseMap();
+            CreateMap<ShippingAddress, ShippingAddressDto>().ReverseMap();
             CreateMap<Address, ShippingAddressDto>().ReverseMap();
-        } 
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace ECom.Application.Services
         private readonly ICouponService _couponService;
         private readonly UserManager<AppUser> _userManager;
 
-        public OrderService(IUnitOfWork unitOfWork,IMapper mapper,IPaymentService paymentService,INotificationService notificationService,ICouponService couponService,UserManager<AppUser> userManager)
+        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentService paymentService, INotificationService notificationService, ICouponService couponService, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -46,7 +46,7 @@ namespace ECom.Application.Services
             if (basket is null)
                 throw new NotFoundException("Basket not found");
 
-           
+
             if (!string.IsNullOrEmpty(basket.PaymentIntentId))
             {
                 var existOrder = await _unitOfWork.OrderRepository

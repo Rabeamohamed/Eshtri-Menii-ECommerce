@@ -65,7 +65,7 @@ namespace ECom.API.Middleware
                 var response = _environment.IsDevelopment()
                     ? new ApiExceptions(context.Response.StatusCode, ex.Message, ex.StackTrace)
                     : new ApiExceptions(context.Response.StatusCode, "An unexpected error occurred.");
-                
+
                 var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
                 var json = JsonSerializer.Serialize(response, options);
 

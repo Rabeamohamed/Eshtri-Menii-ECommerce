@@ -60,7 +60,7 @@ namespace ECom.Infrastructure.Repositories
         public async Task<bool> HasUserReviewedProductAsync(int productId, string userId)
         {
             return await _context.Reviews
-                .AnyAsync(r => r.ProductId == productId && r.UserId == userId); 
+                .AnyAsync(r => r.ProductId == productId && r.UserId == userId);
             // Check if the user has already reviewed the product
         }
 

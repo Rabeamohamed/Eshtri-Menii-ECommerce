@@ -148,7 +148,7 @@ namespace ECom.Infrastructure.Repositories
                 return "Invalid Email";
             }
             var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
-            if (result.Succeeded) 
+            if (result.Succeeded)
             {
                 return "Password Reset and changed Successfully";
             }
@@ -171,7 +171,7 @@ namespace ECom.Infrastructure.Repositories
             {
                 return "User Active Successfully";
             }
-            
+
             return result.Errors.FirstOrDefault()?.Description ?? "Failed to activate user";
         }
 

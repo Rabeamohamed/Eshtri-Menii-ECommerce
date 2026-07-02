@@ -29,7 +29,7 @@ namespace ECom.Infrastructure
         public static IServiceCollection InfrastructureConfiguration(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            
+
             // Register specific repositories
             service.AddScoped<ICategoryRepository, CategoryRepository>();
             service.AddScoped<IProductRepository, ProductRepository>();
@@ -75,7 +75,8 @@ namespace ECom.Infrastructure
             service.AddSingleton<IImageManagementService, ImageManagementService>();
 
             // Apply DbContext Registration
-            service.AddDbContext<AppDbContext>(options => {
+            service.AddDbContext<AppDbContext>(options =>
+            {
                 options.UseSqlServer(configuration.GetConnectionString("EComConnection"));
             });
 
@@ -99,7 +100,7 @@ namespace ECom.Infrastructure
                  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                  options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
              })
-                
+
                 .AddCookie(o =>
              {
                  o.Cookie.Name = "token";
@@ -109,8 +110,8 @@ namespace ECom.Infrastructure
                      return Task.CompletedTask;
                  };
              })
-             
-             .AddJwtBearer(op=>
+
+             .AddJwtBearer(op =>
              {
                  op.RequireHttpsMetadata = configuration.GetValue("Jwt:RequireHttpsMetadata", false);
                  op.SaveToken = true;

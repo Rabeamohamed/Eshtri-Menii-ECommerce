@@ -4,7 +4,7 @@ using ECom.Core.Enums;
 
 namespace ECom.Core.Entities
 {
-    public class Coupon:BaseEntity<int>
+    public class Coupon : BaseEntity<int>
     {
         public string Code { get; set; }           // e.g. "SUMMER20"
         public string Description { get; set; }

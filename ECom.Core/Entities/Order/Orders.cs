@@ -5,9 +5,9 @@ namespace ECom.Core.Entities.Order
     {
         public Orders()
         {
-            
+
         }
-        public Orders(string buyerEmail, decimal subTotal, ShippingAddress shippingAddress, DeliveryMethod deliveryMethod, IReadOnlyList<OrderItems> orderItems,string paymentIntentId)
+        public Orders(string buyerEmail, decimal subTotal, ShippingAddress shippingAddress, DeliveryMethod deliveryMethod, IReadOnlyList<OrderItems> orderItems, string paymentIntentId)
         {
             BuyerEmail = buyerEmail;
             SubTotal = subTotal;
@@ -19,7 +19,7 @@ namespace ECom.Core.Entities.Order
 
         public string BuyerEmail { get; set; }
         public decimal SubTotal { get; set; }
-        public DateTime OrderDate { get; set; }= DateTime.Now;
+        public DateTime OrderDate { get; set; } = DateTime.Now;
         public ShippingAddress ShippingAddress { get; set; }
         public string PaymentIntentId { get; set; }
         public DeliveryMethod DeliveryMethod { get; set; }

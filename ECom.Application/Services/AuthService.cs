@@ -58,8 +58,8 @@ namespace ECom.Application.Services
                 throw new BusinessException(result.Errors.First().Description, 400);
 
             // Ensure valid role selection (Prevent users from registering as Admin)
-            var roleToAssign = string.Equals(registerDto.Role, "Vendor", StringComparison.OrdinalIgnoreCase) 
-                ? "Vendor" 
+            var roleToAssign = string.Equals(registerDto.Role, "Vendor", StringComparison.OrdinalIgnoreCase)
+                ? "Vendor"
                 : "Customer";
 
             await _userManager.AddToRoleAsync(user, roleToAssign);

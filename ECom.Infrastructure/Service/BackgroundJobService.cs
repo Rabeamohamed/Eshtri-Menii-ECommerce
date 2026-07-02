@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace ECom.Infrastructure.Service
 {
-    internal class BackgroundJobService: IBackgroundJobService
+    internal class BackgroundJobService : IBackgroundJobService
     {
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
@@ -179,5 +179,5 @@ namespace ECom.Infrastructure.Service
         }
     }
 
-    }
+}
 

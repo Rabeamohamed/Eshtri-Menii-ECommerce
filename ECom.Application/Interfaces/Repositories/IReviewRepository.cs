@@ -10,7 +10,7 @@ namespace ECom.Application.Interfaces.Repositories
         Task<bool> HasUserReviewedProductAsync(int productId, string userId);
         Task<bool> HasUserPurchasedProductAsync(int productId, string userEmail);
         Task AddReviewAsync(Review review);
-        Task UpdateReviewAsync (Review review);
+        Task UpdateReviewAsync(Review review);
         Task DeleteReviewAsync(Review review);
     }
 }

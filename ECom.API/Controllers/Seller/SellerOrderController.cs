@@ -32,10 +32,10 @@ namespace ECom.API.Controllers.Seller
         {
             var sellerId = GetSellerId();
             var order = await _orderService.GetMyOrderByIdAsync(sellerId, id);
-            
+
             if (order is null)
                 return NotFound(new { Message = "Order not found or contains no items belonging to you." });
-                
+
             return Ok(order);
         }
     }

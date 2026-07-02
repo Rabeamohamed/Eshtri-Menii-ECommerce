@@ -12,7 +12,7 @@ namespace ECom.API.Controllers
         public IActionResult Error(int statusCode)
         {
             return new ObjectResult(new ResponseAPI(statusCode));
-           
+
         }
     }
 }

@@ -59,7 +59,7 @@ namespace ECom.Application.Services
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id, p => p.Category, product => product.Photos);
             if (product is null || product.SellerId != sellerId)
                 return null;
-                
+
             return _mapper.Map<ProductDto>(product);
         }
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace ECom.Infrastructure.Hubs
 {
     [Authorize]
-    public class NotificationHub :Hub
+    public class NotificationHub : Hub
     {
         // Called when user connects
         public override async Task OnConnectedAsync()

@@ -53,7 +53,7 @@ internal class Program
             .AddDbContextCheck<AppDbContext>("database");
 
         builder.Services.InfrastructureConfiguration(builder.Configuration);
-        builder.Services.AddApplicationServices();  
+        builder.Services.AddApplicationServices();
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         var app = builder.Build();

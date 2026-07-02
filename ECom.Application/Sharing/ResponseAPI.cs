@@ -5,7 +5,7 @@ namespace ECom.Application.Sharing
         public ResponseAPI(int statusCode, string message = null)
         {
             StatusCode = statusCode;
-            Message = message?? GetMessageFromStatusCode(StatusCode);
+            Message = message ?? GetMessageFromStatusCode(StatusCode);
         }
         private string GetMessageFromStatusCode(int statusCode)
         {
@@ -18,11 +18,11 @@ namespace ECom.Application.Sharing
                 403 => "Forbidden",
                 404 => "Resource Not Found",
                 500 => "Internal Server Error",
-                _=> null
+                _ => null
             };
         }
         public int StatusCode { get; set; }
         public string? Message { get; set; }
-        
+
     }
 }

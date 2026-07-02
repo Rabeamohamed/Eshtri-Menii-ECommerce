@@ -17,10 +17,10 @@ namespace ECom.Infrastructure.Service
         }
         public async Task SendEmailAsync(EmailDto emailDto)
         {
-            MimeMessage message = new ();
-            message.From.Add (new MailboxAddress ("Eshtri-Menii",_configuration["EmailSettings:From"]));
+            MimeMessage message = new();
+            message.From.Add(new MailboxAddress("Eshtri-Menii", _configuration["EmailSettings:From"]));
             message.Subject = emailDto.Subject;
-            message.To.Add (new MailboxAddress (emailDto.To, emailDto.To));
+            message.To.Add(new MailboxAddress(emailDto.To, emailDto.To));
             message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
                 Text = emailDto.Content
@@ -30,7 +30,7 @@ namespace ECom.Infrastructure.Service
                 try
                 {
                     await smtp.ConnectAsync(_configuration["EmailSettings:Smtp"],
-                        int.Parse(_configuration["EmailSettings:Port"]),true);
+                        int.Parse(_configuration["EmailSettings:Port"]), true);
 
                     await smtp.AuthenticateAsync(_configuration["EmailSettings:UserName"],
                         _configuration["EmailSettings:Password"]);

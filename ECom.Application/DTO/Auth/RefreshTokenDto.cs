@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ECom.Application.DTO.Auth
 {
-        public record RefreshTokenDto
-        {
-            public string RefreshToken { get; init; }
-        }
+    public record RefreshTokenDto
+    {
+        public string RefreshToken { get; init; }
+    }
 }

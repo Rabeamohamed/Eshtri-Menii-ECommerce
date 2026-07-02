@@ -49,7 +49,7 @@ namespace ECom.Infrastructure.Service
 
             SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor() 
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(15),

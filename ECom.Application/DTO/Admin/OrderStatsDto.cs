@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ECom.Application.DTO.Admin
-{   
+{
     // Order Stats
     public record OrderStatsDto
     {

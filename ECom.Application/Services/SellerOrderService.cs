@@ -37,7 +37,7 @@ namespace ECom.Application.Services
         public async Task<IReadOnlyList<OrderToReturnDto>> GetMyOrdersAsync(string sellerId)
         {
             var orders = await _unitOfWork.OrderRepository.GetOrdersForSellerAsync(sellerId);
-            
+
             // For each order, we only want to expose the items that belong to the seller
             foreach (var order in orders)
             {

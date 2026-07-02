@@ -2,7 +2,7 @@
 
 namespace ECom.API.Filters
 {
-    
+
     public sealed class AdminAuditActionFilter : IAsyncActionFilter
     {
         private readonly ILogger<AdminAuditActionFilter> _logger;

@@ -16,8 +16,8 @@ namespace ECom.Application.Mapping
                 .ForMember(x => x.CategoryId,
                     op => op.MapFrom(x => x.CategoryId));
 
-            CreateMap<AddProductDto , Product>()
-                .ForMember(p => p.Photos, op =>op.Ignore())
+            CreateMap<AddProductDto, Product>()
+                .ForMember(p => p.Photos, op => op.Ignore())
                 .ReverseMap();
 
             CreateMap<UpdateProductDto, Product>()

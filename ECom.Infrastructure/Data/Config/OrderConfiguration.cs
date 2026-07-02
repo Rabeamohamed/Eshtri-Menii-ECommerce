@@ -9,7 +9,7 @@ namespace ECom.Infrastructure.Data.Config
         public void Configure(EntityTypeBuilder<Orders> builder)
         {
             // Relations between Orders and Shipping Address
-            builder.OwnsOne(x=>x.ShippingAddress, // One to one Relation
+            builder.OwnsOne(x => x.ShippingAddress, // One to one Relation
                 n => { n.WithOwner(); });
 
             //Many to Many With OrderItems

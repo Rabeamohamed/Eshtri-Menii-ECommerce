@@ -24,7 +24,7 @@ namespace ECom.Application.Services
             var orderStats = await GetMyOrderStatsAsync(sellerId);
             var bestSelling = await GetMyBestSellingProductsAsync(sellerId, 5);
             var outOfStock = await GetMyOutOfStockProductsAsync(sellerId);
-            
+
             // Total products owned by this seller
             var totalProducts = await _unitOfWork.ProductRepository.CountAsync(new Sharing.ProductParams { SellerId = sellerId });
 

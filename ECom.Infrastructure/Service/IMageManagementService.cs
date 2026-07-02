@@ -14,7 +14,7 @@ namespace ECom.Infrastructure.Service
         public async Task<List<string>> AddImageAsync(IFormFileCollection files, string src)
         {
             List<string> SaveImageSrc = new List<string>(); // List to Save Image Src,List Because the product may have more than one image
-            var ImageDirectory = Path.Combine("wwwroot","Images", src);
+            var ImageDirectory = Path.Combine("wwwroot", "Images", src);
 
             if (!Directory.Exists(ImageDirectory)) // Check if Directory Exists or not 
             {
@@ -27,14 +27,14 @@ namespace ECom.Infrastructure.Service
                 {
                     // Get Image Name
                     var ImageName = file.FileName;
-                    
+
                     var ImageSrc = $"Images/{src}/{ImageName}"; // Create Image Src
                     var root = Path.Combine(ImageDirectory, ImageName); // Create Root Path
                     using (FileStream stream = new FileStream(root, FileMode.Create)) // Save Image to folder
                     {
                         await file.CopyToAsync(stream);
                     }
-                    
+
                     SaveImageSrc.Add(ImageSrc);
                 }
             }

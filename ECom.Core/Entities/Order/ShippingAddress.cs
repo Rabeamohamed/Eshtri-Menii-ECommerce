@@ -6,7 +6,7 @@ namespace ECom.Core.Entities.Order
     {
         public ShippingAddress()
         {
-            
+
         }
         public ShippingAddress(string firstName, string lastName, string city, string zipCode, string street, string state)
         {

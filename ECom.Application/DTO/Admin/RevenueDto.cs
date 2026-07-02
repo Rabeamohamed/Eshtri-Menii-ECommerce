@@ -1,6 +1,6 @@
 
 namespace ECom.Application.DTO.Admin
-{   
+{
     // Revenue
     public record RevenueDto
     {

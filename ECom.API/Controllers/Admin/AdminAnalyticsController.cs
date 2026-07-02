@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECom.API.Controllers.Admin
 {
- 
+
     public class AdminAnalyticsController : AdminBaseController
     {
         private readonly IAdminAnalyticsService _analyticsService;

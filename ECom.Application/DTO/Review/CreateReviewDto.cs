@@ -8,7 +8,7 @@ namespace ECom.Application.DTO.Review
         public int ProductId { get; init; }
 
         [Required]
-        [Range(1, 5,ErrorMessage ="Rating Must be between 1 and 5")]
+        [Range(1, 5, ErrorMessage = "Rating Must be between 1 and 5")]
         public int Rating { get; init; }
 
         [Required]

@@ -81,7 +81,7 @@ namespace ECom.Infrastructure.Repositories
                 .Where(o => o.Status == PaymentStatus.PaymentReceived);
 
             var now = DateTime.UtcNow;
-            
+
             var totalRevenue = await query.SumAsync(o => o.SubTotal);
             var dailyRevenue = await query
                 .Where(o => o.OrderDate >= now.AddDays(-1))
@@ -92,7 +92,7 @@ namespace ECom.Infrastructure.Repositories
             var monthlyRevenue = await query
                 .Where(o => o.OrderDate >= now.AddMonths(-1))
                 .SumAsync(o => o.SubTotal);
-            
+
             var orderCount = await query.CountAsync();
             var averageOrderValue = orderCount > 0
                 ? totalRevenue / orderCount
